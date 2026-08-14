@@ -57,6 +57,13 @@ def dir_normal(theta_deg):
     return np.array([-np.sin(theta), np.cos(theta), 0.0])
 
 
+def cap_width(mobject, max_width=3.9):
+    """Encoge (nunca agranda) un mobject para que quepa en el frame vertical angosto."""
+    if mobject.width > max_width:
+        mobject.scale(max_width / mobject.width)
+    return mobject
+
+
 class DinamicaFriccionTikTok(Scene):
     def construct(self):
         self.hook()
@@ -77,10 +84,10 @@ class DinamicaFriccionTikTok(Scene):
             self.plano, self.bloque, self.base_line, self.arco_angulo
         ).move_to(ORIGIN)
 
-        hook_text = Text(
+        hook_text = cap_width(Text(
             "¿Qué ángulo lo hace\nacelerar de golpe?",
             font_size=34, weight=BOLD,
-        ).to_edge(UP, buff=1.0)
+        )).to_edge(UP, buff=1.0)
 
         self.play(FadeIn(grupo_inicial), Write(hook_text), run_time=1.2)
 
@@ -108,7 +115,8 @@ class DinamicaFriccionTikTok(Scene):
             MathTex(r"m = 2\ \text{kg}"),
             MathTex(r"\mu_s = 0.6"),
             MathTex(r"\mu_k = 0.4"),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.35).scale(0.9).to_edge(UP, buff=1.3)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.35).scale(0.9)
+        cap_width(datos).to_edge(UP, buff=1.3)
 
         flecha = Arrow(
             start=datos.get_bottom() + DOWN * 0.1,
@@ -127,7 +135,7 @@ class DinamicaFriccionTikTok(Scene):
     # 0:16 - 0:26  Diagrama de cuerpo libre (DCL)
     # ------------------------------------------------------------------
     def dcl(self):
-        self.play(self.hook_group.animate.scale(1.3).move_to(ORIGIN), FadeOut(self.datos))
+        self.play(self.hook_group.animate.scale(1.3).move_to(RIGHT * 0.9), FadeOut(self.datos))
 
         centro = self.bloque.get_center()
         d = dir_plano(THETA_1)     # cuesta arriba
@@ -146,7 +154,8 @@ class DinamicaFriccionTikTok(Scene):
             Dot(color=COLOR_PESO).scale(0.6), Text("Peso", font_size=22, color=COLOR_PESO),
             Dot(color=COLOR_NORMAL).scale(0.6), Text("Normal", font_size=22, color=COLOR_NORMAL),
             Dot(color=COLOR_FRICCION).scale(0.6), Text("Fricción", font_size=22, color=COLOR_FRICCION),
-        ).arrange_in_grid(rows=3, cols=2, buff=0.2).to_edge(UP, buff=1.0)
+        ).arrange_in_grid(rows=3, cols=2, buff=0.2)
+        cap_width(leyenda).to_edge(UP, buff=1.0)
 
         self.play(Write(leyenda), run_time=0.8)
         self.play(GrowArrow(self.v_peso), Write(etiqueta_peso), run_time=0.7)
@@ -187,18 +196,18 @@ class DinamicaFriccionTikTok(Scene):
         formula_normal = MathTex(r"N = mg\cos\theta").scale(0.75).to_edge(UP, buff=1.1)
         self.play(TransformMatchingTex(eq_perp.copy(), formula_normal), run_time=0.9)
         self.wait(0.5)
-        self.play(FadeOut(formula_normal), FadeOut(comp_paralela), FadeOut(comp_perp))
-
-        self.eq_paralela = eq_paralela
-        self.eq_perp = eq_perp
+        self.play(
+            FadeOut(formula_normal), FadeOut(comp_paralela), FadeOut(comp_perp),
+            FadeOut(eq_paralela), FadeOut(eq_perp),
+        )
 
     # ------------------------------------------------------------------
     # 0:36 - 0:46  Comparacion a 30 grados: no desliza
     # ------------------------------------------------------------------
     def comparar_30(self):
-        desigualdad = MathTex(
+        desigualdad = cap_width(MathTex(
             r"mg\sin\theta", r"\ \overset{?}{\leq}\ ", r"\mu_s\, mg\cos\theta"
-        ).scale(0.85).to_edge(UP, buff=1.0)
+        ).scale(0.85)).to_edge(UP, buff=1.0)
         self.play(Write(desigualdad), run_time=0.8)
 
         val_izq = ValueTracker(0)
@@ -219,8 +228,8 @@ class DinamicaFriccionTikTok(Scene):
         )
         self.wait(0.4)
 
-        resultado = Text("NO desliza (por muy poco)", font_size=26, color=GREEN, weight=BOLD)
-        resultado.next_to(num_izq, DOWN, buff=0.6)
+        resultado = cap_width(Text("NO desliza (por muy poco)", font_size=26, color=GREEN, weight=BOLD))
+        resultado.next_to(VGroup(num_izq, num_der), DOWN, buff=0.6)
         marco = SurroundingRectangle(VGroup(num_izq, num_der), color=YELLOW, buff=0.25)
 
         self.play(Create(marco), run_time=0.5)
@@ -247,19 +256,19 @@ class DinamicaFriccionTikTok(Scene):
         )
         self.play(self.bloque.animate.set_stroke(COLOR_NETA, width=6), run_time=0.3)
 
-        desigualdad2 = MathTex(
+        desigualdad2 = cap_width(MathTex(
             f"{mg_sin(THETA_2):.2f}", r"\,N", r"\ >\ ",
             f"{MU_S * mg_cos(THETA_2):.2f}", r"\,N",
-        ).scale(0.8).to_edge(UP, buff=1.0)
+        ).scale(0.8)).to_edge(UP, buff=1.0)
         self.play(Write(desigualdad2), run_time=0.8)
         self.play(Indicate(desigualdad2, color=COLOR_NETA), run_time=0.6)
         self.wait(0.3)
         self.play(FadeOut(desigualdad2))
 
-        ley_general = MathTex(r"\sum F = m a").scale(0.9).to_edge(UP, buff=1.0)
-        ley_sustituida = MathTex(
+        ley_general = cap_width(MathTex(r"\sum F = m a").scale(0.9)).to_edge(UP, buff=1.0)
+        ley_sustituida = cap_width(MathTex(
             r"mg\sin\theta - \mu_k mg\cos\theta = ma"
-        ).scale(0.75).to_edge(UP, buff=1.0)
+        ).scale(0.75)).to_edge(UP, buff=1.0)
 
         self.play(Write(ley_general), run_time=0.7)
         self.wait(0.3)
@@ -267,7 +276,7 @@ class DinamicaFriccionTikTok(Scene):
         self.wait(0.4)
 
         a_valor = (mg_sin(THETA_2) - MU_K * mg_cos(THETA_2)) / M
-        resultado_a = MathTex(f"a \\approx {a_valor:.2f}\\ m/s^2", color=COLOR_NETA).scale(1.0)
+        resultado_a = cap_width(MathTex(f"a \\approx {a_valor:.2f}\\ m/s^2", color=COLOR_NETA))
         resultado_a.next_to(ley_sustituida, DOWN, buff=0.6)
 
         self.play(Write(resultado_a), Flash(resultado_a.get_center(), color=COLOR_NETA), run_time=0.9)
@@ -296,14 +305,15 @@ class DinamicaFriccionTikTok(Scene):
     # 1:03 - 1:13  Estrategia resumida (conclusion)
     # ------------------------------------------------------------------
     def estrategia(self):
-        titulo = Text("Estrategia para cualquier\nproblema de fricción", font_size=28, weight=BOLD)
+        titulo = cap_width(Text("Estrategia para cualquier\nproblema de fricción", font_size=28, weight=BOLD))
         titulo.to_edge(UP, buff=1.2)
 
         pasos = VGroup(
-            Text("1. Diagrama de cuerpo libre", font_size=24),
-            Text("2. ¿F ≤ fricción estática máxima?", font_size=24),
-            Text("3. Si se mueve: 2ª Ley con fricción cinética", font_size=24),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.5)
+            Text("1. Diagrama de\ncuerpo libre", font_size=22, line_spacing=1.0),
+            Text("2. ¿F ≤ fricción\nestática máxima?", font_size=22, line_spacing=1.0),
+            Text("3. Si desliza: 2ª Ley\ncon fricción cinética", font_size=22, line_spacing=1.0),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.4)
+        cap_width(pasos)
 
         flechas = VGroup(*[
             Arrow(pasos[i].get_bottom(), pasos[i + 1].get_top(), buff=0.1, stroke_width=3, color=YELLOW)
@@ -321,13 +331,13 @@ class DinamicaFriccionTikTok(Scene):
     # 1:13 - 1:24  Reto final + cierre
     # ------------------------------------------------------------------
     def reto_final(self):
-        reto_titulo = Text("TU RETO 🧠", font_size=36, weight=BOLD, color=YELLOW).to_edge(UP, buff=1.3)
-        reto_texto = Text(
-            "¿Cuál es el ángulo crítico\nexacto en el que este bloque\nempieza a deslizar?",
+        reto_titulo = cap_width(Text("TU RETO 🧠", font_size=36, weight=BOLD, color=YELLOW)).to_edge(UP, buff=1.3)
+        reto_texto = cap_width(Text(
+            "¿Cuál es el ángulo\ncrítico exacto en el\nque este bloque\nempieza a deslizar?",
             font_size=26, line_spacing=1.2,
-        ).next_to(reto_titulo, DOWN, buff=0.6)
+        )).next_to(reto_titulo, DOWN, buff=0.6)
 
-        pista = MathTex(r"\tan\theta_c = \mu_s").scale(0.9).set_opacity(0.5)
+        pista = cap_width(MathTex(r"\tan\theta_c = \mu_s").scale(0.9).set_opacity(0.5))
         pista.next_to(reto_texto, DOWN, buff=0.8)
 
         self.play(Write(reto_titulo), run_time=0.6)
@@ -336,7 +346,7 @@ class DinamicaFriccionTikTok(Scene):
         self.play(FadeIn(pista), run_time=0.6)
         self.wait(1.0)
 
-        cierre = Text("Física en 60s — Parte 1/2\nSígueme para la Parte 2 👀", font_size=24)
+        cierre = cap_width(Text("Física en 60s — Parte 1/2\nSígueme para la Parte 2 👀", font_size=24))
         cierre.next_to(pista, DOWN, buff=0.8)
         self.play(Write(cierre), run_time=1.0)
         self.wait(1.5)
