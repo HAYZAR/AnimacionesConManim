@@ -100,7 +100,7 @@ class DinamicaFriccionTikTok(Scene):
         self.add(angulo_label)
         self.play(angulo_tracker.animate.set_value(THETA_1), run_time=1.4, rate_func=rush_from)
         self.play(Wiggle(self.bloque, scale_value=1.05, rotation_angle=0.01 * TAU), run_time=1.0)
-        self.wait(0.4)
+        self.wait(1.4)
 
         self.play(FadeOut(hook_text), FadeOut(angulo_label))
         self.hook_group = grupo_inicial
@@ -128,6 +128,7 @@ class DinamicaFriccionTikTok(Scene):
         self.play(GrowArrow(flecha), run_time=0.6)
         self.wait(0.8)
         self.play(FadeOut(flecha))
+        self.wait(5.0)
 
         self.datos = datos
 
@@ -170,6 +171,7 @@ class DinamicaFriccionTikTok(Scene):
             self.v_peso, self.v_normal, self.v_friccion,
             etiqueta_peso, etiqueta_normal, etiqueta_friccion,
         )
+        self.wait(4.2)
 
     # ------------------------------------------------------------------
     # 0:26 - 0:36  Descomposicion del peso
@@ -200,6 +202,7 @@ class DinamicaFriccionTikTok(Scene):
             FadeOut(formula_normal), FadeOut(comp_paralela), FadeOut(comp_perp),
             FadeOut(eq_paralela), FadeOut(eq_perp),
         )
+        self.wait(5.2)
 
     # ------------------------------------------------------------------
     # 0:36 - 0:46  Comparacion a 30 grados: no desliza
@@ -241,6 +244,7 @@ class DinamicaFriccionTikTok(Scene):
             FadeOut(desigualdad), FadeOut(num_izq), FadeOut(num_der),
             FadeOut(resultado), FadeOut(marco),
         )
+        self.wait(3.9)
 
     # ------------------------------------------------------------------
     # 0:46 - 1:03  Se inclina a 35 grados: si desliza -> 2da ley
@@ -264,6 +268,7 @@ class DinamicaFriccionTikTok(Scene):
         self.play(Indicate(desigualdad2, color=COLOR_NETA), run_time=0.6)
         self.wait(0.3)
         self.play(FadeOut(desigualdad2))
+        self.wait(2.5)
 
         ley_general = cap_width(MathTex(r"\sum F = m a").scale(0.9)).to_edge(UP, buff=1.0)
         ley_sustituida = cap_width(MathTex(
@@ -300,6 +305,7 @@ class DinamicaFriccionTikTok(Scene):
             FadeOut(ley_sustituida), FadeOut(resultado_a), FadeOut(v_aceleracion),
             FadeOut(grupo_plano), FadeOut(self.base_line),
         )
+        self.wait(2.7)
 
     # ------------------------------------------------------------------
     # 1:03 - 1:13  Estrategia resumida (conclusion)
@@ -323,7 +329,7 @@ class DinamicaFriccionTikTok(Scene):
         self.play(Write(titulo), run_time=0.8)
         self.play(LaggedStart(*[FadeIn(p, shift=RIGHT * 0.3) for p in pasos], lag_ratio=0.4), run_time=1.6)
         self.play(*[GrowArrow(f) for f in flechas], run_time=0.6)
-        self.wait(1.2)
+        self.wait(6.0)
 
         self.play(FadeOut(titulo), FadeOut(pasos), FadeOut(flechas))
 
@@ -342,14 +348,14 @@ class DinamicaFriccionTikTok(Scene):
 
         self.play(Write(reto_titulo), run_time=0.6)
         self.play(FadeIn(reto_texto, shift=UP * 0.2), run_time=0.8)
-        self.wait(0.5)
+        self.wait(2.0)
         self.play(FadeIn(pista), run_time=0.6)
-        self.wait(1.0)
+        self.wait(2.5)
 
         cierre = cap_width(Text("Física en 60s — Parte 1/2\nSígueme para la Parte 2 👀", font_size=24))
         cierre.next_to(pista, DOWN, buff=0.8)
         self.play(Write(cierre), run_time=1.0)
-        self.wait(1.5)
+        self.wait(4.0)
 
     # ------------------------------------------------------------------
     # Helpers de construccion geometrica
