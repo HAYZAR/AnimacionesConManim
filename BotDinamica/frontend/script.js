@@ -1,6 +1,6 @@
 // Reemplaza esto por la URL de tu implementación de Apps Script Web App.
 // Ver docs/DEPLOY.md, paso 2.7.
-const WEB_APP_URL = 'https://script.google.com/macros/s/TU_ID_DE_IMPLEMENTACION/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyOqKppyyRUCrXHh2bXnEnsvXJ6rbtC2YGPADra7QKQ00Cqn7gWc5OtyJhTDAaVray9Tw/exec';
 
 const pantallaLogin = document.getElementById('pantalla-login');
 const pantallaChat = document.getElementById('pantalla-chat');
