@@ -8,7 +8,7 @@ const HOJA_RESULTADOS = 'Resultados';
 const HOJA_CONVERSACIONES = 'Conversaciones';
 const HOJA_FORMULARIOS = 'Formularios';
 
-const GEMINI_MODELO = 'gemini-1.5-flash';
+const GEMINI_MODELO = 'gemini-2.5-flash';
 const GEMINI_TEMPERATURA = 0.4;
 const GEMINI_MAX_TOKENS_SALIDA = 2048;
 

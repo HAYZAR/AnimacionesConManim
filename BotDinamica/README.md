@@ -26,7 +26,7 @@ apps-script/  (Google Apps Script, Web App doPost/doGet)
 Google Sheet  ("Banco", "Resultados", "Conversaciones", "Formularios")
    │  perfil + banco + historial
    ▼
-Gemini API (gemini-1.5-flash)  ← "cerebro" socrático
+Gemini API (gemini-2.5-flash)  ← "cerebro" socrático
 ```
 
 Ver el detalle completo en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
