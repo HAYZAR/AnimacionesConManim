@@ -1,0 +1,51 @@
+name: Build diagramas TikZ (NewtonBot Dinámica)
+
+on:
+  push:
+    paths:
+      - 'BotDinamica/imagenes/tikz/**.tex'
+      - '.github/workflows/build-imagenes-dinamica.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: texlive/texlive:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar git (por si la imagen no lo trae)
+        run: |
+          command -v git >/dev/null 2>&1 || (apt-get update && apt-get install -y --no-install-recommends git)
+
+      - name: Compilar cada .tex a PNG
+        run: |
+          set -e
+          mkdir -p BotDinamica/imagenes/render
+          cd BotDinamica/imagenes/tikz
+          shopt -s nullglob
+          for archivo in *.tex; do
+            nombre="${archivo%.tex}"
+            echo "Compilando $archivo..."
+            pdflatex -interaction=nonstopmode -halt-on-error "$archivo"
+            pdftoppm -png -r 200 "$nombre.pdf" "../render/$nombre"
+            # pdftoppm agrega sufijo de página, ej. "DIN-001-1.png";
+            # lo normalizamos a "DIN-001.png" (documentos de una sola página).
+            if [ -f "../render/$nombre-1.png" ]; then
+              mv "../render/$nombre-1.png" "../render/$nombre.png"
+            fi
+          done
+
+      - name: Commit de los PNG generados
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add BotDinamica/imagenes/render/*.png
+          git diff --cached --quiet || git commit -m "Actualiza diagramas TikZ renderizados [skip ci]"
+          git push

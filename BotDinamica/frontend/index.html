@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NewtonBot — Tutor de Dinámica</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <h1>NewtonBot</h1>
+      <p>Tutor socrático de Dinámica</p>
+    </header>
+
+    <section id="pantalla-login" class="login">
+      <label for="input-estudiante-id">Tu identificador de estudiante</label>
+      <input id="input-estudiante-id" type="text" placeholder="Ej. EST-045" autocomplete="off">
+      <button id="btn-iniciar">Iniciar sesión</button>
+      <p id="login-error" class="error" hidden></p>
+    </section>
+
+    <section id="pantalla-chat" class="chat" hidden>
+      <div id="mensajes" class="chat__mensajes" aria-live="polite"></div>
+
+      <div id="indicador-cargando" class="chat__cargando" hidden>NewtonBot está pensando…</div>
+
+      <form id="form-mensaje" class="chat__form">
+        <textarea id="input-mensaje" placeholder="Escribe tu respuesta…" rows="2" required></textarea>
+        <div class="chat__acciones">
+          <button type="submit" id="btn-enviar">Enviar</button>
+          <button type="button" id="btn-generar-test">Generar nuevo test</button>
+        </div>
+      </form>
+
+      <p id="chat-error" class="error" hidden></p>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
