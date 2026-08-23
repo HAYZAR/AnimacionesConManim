@@ -218,6 +218,13 @@ button:disabled { background: #c9bfa8; cursor: not-allowed; transform: none; }
   text-align: center;
 }
 .mensaje a { color: inherit; }
+.mensaje--sistema a {
+  color: var(--color-primario);
+  font-style: normal;
+  font-weight: 600;
+  text-decoration: underline;
+  word-break: break-all;
+}
 
 .opciones {
   display: grid;

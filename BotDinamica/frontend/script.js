@@ -91,7 +91,7 @@ async function generarTest() {
     const datos = await llamarWebApp({ accion: 'generar_test', estudiante_id: estudianteId });
     marcarPaso(progresoConversacionEl, 'completo');
     marcarPaso(progresoTestEl, 'activo');
-    agregarMensajeSistema('Nuevo test generado: ' + datos.url_formulario);
+    agregarMensajeSistemaConEnlace('Tu nuevo test está listo:', datos.url_formulario);
   } catch (error) {
     mostrarError(chatError, 'No se pudo generar el test: ' + error.message);
   } finally {
@@ -137,6 +137,19 @@ function agregarMensajeUsuario(texto) {
 
 function agregarMensajeSistema(texto) {
   agregarMensaje('sistema', escaparHtml(texto));
+}
+
+/**
+ * Mensaje de sistema con un link real y clicable (ej. el Google Form del
+ * test generado). Antes se interpolaba la URL como texto plano escapado,
+ * lo que la dejaba visible pero sin poder hacer clic en ella.
+ */
+function agregarMensajeSistemaConEnlace(texto, url) {
+  const div = document.createElement('div');
+  div.textContent = url;
+  const urlEscapada = div.innerHTML;
+  const html = escaparHtml(texto) + '<br><a href="' + urlEscapada + '" target="_blank" rel="noopener noreferrer">' + urlEscapada + '</a>';
+  agregarMensaje('sistema', html);
 }
 
 function agregarMensaje(tipo, htmlSeguro) {
