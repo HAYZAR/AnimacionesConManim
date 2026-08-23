@@ -1,0 +1,13 @@
+% DCL del balón en reposo sobre el césped (DIAG-02: Diagrama de cuerpo libre).
+\documentclass[tikz,border=3pt]{standalone}
+\begin{document}
+\begin{tikzpicture}[>=Latex, thick, font=\large]
+  \draw[line width=1.2pt] (-2,0) -- (2,0);
+  \foreach \x in {-1.8,-1.5,...,1.8} \draw (\x,0) -- (\x-0.25,-0.25);
+
+  \filldraw[fill=white!90!black, draw=black] (0,0.6) circle (0.6);
+
+  \draw[->, green!45!black] (0,0.6) -- (0,1.9) node[above] {$\vec{N}$};
+  \draw[->, blue!70!black] (0,0.6) -- (0,-0.7) node[below] {$\vec{W}=mg$};
+\end{tikzpicture}
+\end{document}

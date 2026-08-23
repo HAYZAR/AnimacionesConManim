@@ -15,15 +15,29 @@ el orden, pero se respeta el orden acordado):
 | 6 | `Demanda_Cognitiva` | Texto | `Modelar + Justificar`. |
 | 7 | `Tipo_Pregunta` | Texto | `OM+Justificación`, `OM`, `Abierta`. Ver "Cómo se interpreta `Tipo_Pregunta`" abajo. |
 | 8 | `Andamiaje_Recomendado` | Texto | `Bajo` / `Medio` / `Alto`. Nivel de ayuda sugerido para el LLM al guiar esta pregunta. |
-| 9 | `Enunciado` | Texto largo | Texto completo del problema, tal como se le muestra al estudiante. |
-| 10 | `Opciones` | Texto | `A) ... B) ... C) ... D) ...` — ver formato abajo. Vacío si `Tipo_Pregunta` no incluye `OM`. |
-| 11 | `Respuesta_Correcta` | Texto | Letra de la opción correcta, ej. `B`. Vacío para preguntas abiertas (se revisan a mano). |
-| 12 | `Explicacion_Completa` | Texto largo | Explicación detallada. **Uso interno/docente**: el bot nunca la envía al estudiante durante la sesión socrática (ver nota abajo). |
-| 13 | `Pistas_Socraticas` | Texto | Pistas separadas por `\|`, ej. `1. ¿Qué fuerzas actúan...? \| 2. ¿Cuál es la fuerza neta...?`. Referencia que el LLM puede usar para calibrar sus propias preguntas de andamiaje. |
-| 14 | `Activo` | `TRUE`/`FALSE` | Filas con `FALSE` se ignoran al leer el banco. |
-| 15 | `Veces_Usada` | Número | Contador; `Test.gs` lo incrementa automáticamente cada vez que la pregunta se incluye en un test generado (para poder priorizar preguntas menos usadas más adelante). |
-| 16 | `Observaciones` | Texto | Notas de validación del docente; no se envía al LLM. |
-| 17 | `Imagen_URL` | Texto (URL, opcional) | URL pública de un diagrama (ej. diagrama de cuerpo libre) para este problema, ej. `https://raw.githubusercontent.com/hayzar/AnimacionesConManim/master/BotDinamica/imagenes/render/DIN-001.png`. Vacío si el problema no necesita imagen. Ver `docs/IMAGENES.md`. |
+| 9 | `Contexto` | Texto largo (opcional) | Escenario/situación que enmarca el problema (ej. "Dos estudiantes compiten en un juego de tira y afloja en el descanso"), separado del enunciado técnico. Ver "Por qué separar `Contexto` de `Enunciado`" abajo. |
+| 10 | `Enunciado` | Texto largo | La pregunta técnica en sí, tal como se le muestra al estudiante (sin repetir el contexto). |
+| 11 | `Opciones` | Texto | `A) ... B) ... C) ... D) ...` — ver formato abajo. Vacío si `Tipo_Pregunta` no incluye `OM`. |
+| 12 | `Respuesta_Correcta` | Texto | Letra de la opción correcta, ej. `B`. Vacío para preguntas abiertas (se revisan a mano). |
+| 13 | `Explicacion_Completa` | Texto largo | Explicación detallada. **Uso interno/docente**: el bot nunca la envía al estudiante durante la sesión socrática (ver nota abajo). |
+| 14 | `Pistas_Socraticas` | Texto | Pistas separadas por `\|`, ej. `1. ¿Qué fuerzas actúan...? \| 2. ¿Cuál es la fuerza neta...?`. Referencia que el LLM puede usar para calibrar sus propias preguntas de andamiaje. |
+| 15 | `Activo` | `TRUE`/`FALSE` | Filas con `FALSE` se ignoran al leer el banco. |
+| 16 | `Veces_Usada` | Número | Contador; `Test.gs` lo incrementa automáticamente cada vez que la pregunta se incluye en un test generado (para poder priorizar preguntas menos usadas más adelante). |
+| 17 | `Observaciones` | Texto | Notas de validación del docente; no se envía al LLM. |
+| 18 | `Imagen_URL` | Texto (URL, opcional) | URL pública de un diagrama (ej. diagrama de cuerpo libre) para este problema, ej. `https://raw.githubusercontent.com/hayzar/AnimacionesConManim/master/BotDinamica/imagenes/render/DIAG-02.png`. Vacío si el problema no necesita imagen. Ver `docs/IMAGENES.md`. |
+
+## Por qué separar `Contexto` de `Enunciado`
+
+Para que la Dinámica "enganche" a un estudiante de secundaria, ayuda enmarcar
+el problema en una situación reconocible (un partido de fútbol, un bus, un
+ciclista) antes de la pregunta técnica — el mismo patrón "context + stem" que
+usa `Evaluaciones-Saber-11`. Mantenerlos en columnas separadas permite:
+- reutilizar el mismo `Contexto` en varias preguntas relacionadas sin
+  duplicar texto,
+- que el LLM decida *cómo* presentar el contexto (puede parafrasearlo de
+  forma más conversacional) sin alterar el enunciado técnico exacto,
+- y que `Contexto` sea opcional: si está vacío, el bot simplemente presenta
+  el `Enunciado` directo (ver `INSTRUCCION_CONTEXTO` en `Constantes.gs`).
 
 ## Formato de `Opciones`
 

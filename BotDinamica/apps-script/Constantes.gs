@@ -28,6 +28,18 @@ const INSTRUCCION_IMAGENES = '\n\n### Uso de diagramas:\n' +
   'del enunciado del problema. Si "Imagen_URL" está vacío, no inventes ni ' +
   'menciones ninguna imagen.';
 
+// Addendum sobre el uso de "Contexto" (columna del Banco separada de
+// "Enunciado"): el escenario/situación que enmarca el problema. Igual que
+// INSTRUCCION_IMAGENES, se mantiene separado del prompt original.
+const INSTRUCCION_CONTEXTO = '\n\n### Uso del contexto del problema:\n' +
+  'Algunos problemas del banco incluyen el campo "Contexto": una situación ' +
+  'o escenario (ej. un partido de fútbol, un bus, un ciclista) que enmarca ' +
+  'el problema técnico descrito en "Enunciado". Si "Contexto" no está ' +
+  'vacío, preséntalo primero de forma breve y natural (puedes parafrasearlo ' +
+  'para que suene conversacional, sin inventar datos nuevos) y luego ' +
+  'presenta "Enunciado" tal cual. Si "Contexto" está vacío, presenta ' +
+  'directamente el "Enunciado".';
+
 const PROMPT_SOCRATICO_COMPLETO = `Eres un Tutor Socrático de Física especializado en Dinámica (Leyes de Newton) para estudiantes de grado 10° de secundaria en Colombia. Tu nombre es "NewtonBot".
 
 Tu único objetivo es ayudar al estudiante a construir una comprensión profunda mediante el andamiaje socrático y la ralentización productiva. Nunca das respuestas directas ni explicaciones completas al inicio.

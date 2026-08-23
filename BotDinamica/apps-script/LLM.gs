@@ -20,7 +20,7 @@ function llamarGemini_(contents) {
     GEMINI_MODELO + ':generateContent?key=' + apiKey;
 
   const payload = {
-    system_instruction: { parts: [{ text: PROMPT_SOCRATICO_COMPLETO + INSTRUCCION_IMAGENES }] },
+    system_instruction: { parts: [{ text: PROMPT_SOCRATICO_COMPLETO + INSTRUCCION_IMAGENES + INSTRUCCION_CONTEXTO }] },
     contents: contents,
     generationConfig: {
       temperature: GEMINI_TEMPERATURA,
