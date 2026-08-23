@@ -4,17 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NewtonBot — Tutor de Dinámica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app">
     <header class="app__header">
-      <h1>NewtonBot</h1>
-      <p>Tutor socrático de Dinámica</p>
+      <div class="app__marca">
+        <div class="app__logo" aria-hidden="true">N</div>
+        <div>
+          <h1>NewtonBot</h1>
+          <p>Tutor socrático de Dinámica</p>
+        </div>
+      </div>
+      <div id="app-estudiante" class="app__estudiante" hidden></div>
     </header>
 
+    <div id="progreso" class="progreso" hidden>
+      <div id="progreso-inicio" class="progreso__paso is-activo">Inicio</div>
+      <div id="progreso-conversacion" class="progreso__paso">Conversación</div>
+      <div id="progreso-test" class="progreso__paso">Test</div>
+    </div>
+
     <section id="pantalla-login" class="login">
-      <label for="input-estudiante-id">Tu identificador de estudiante</label>
+      <h2>Empecemos</h2>
+      <p class="login__ayuda">Escribe tu identificador de estudiante para comenzar tu sesión con NewtonBot.</p>
+      <label for="input-estudiante-id">Identificador de estudiante</label>
       <input id="input-estudiante-id" type="text" placeholder="Ej. EST-045" autocomplete="off">
       <button id="btn-iniciar">Iniciar sesión</button>
       <p id="login-error" class="error" hidden></p>
@@ -23,13 +40,18 @@
     <section id="pantalla-chat" class="chat" hidden>
       <div id="mensajes" class="chat__mensajes" aria-live="polite"></div>
 
-      <div id="indicador-cargando" class="chat__cargando" hidden>NewtonBot está pensando…</div>
+      <div id="indicador-cargando" class="chat__cargando" hidden>
+        <span class="chat__cargando-punto"></span>
+        <span class="chat__cargando-punto"></span>
+        <span class="chat__cargando-punto"></span>
+        NewtonBot está pensando…
+      </div>
 
       <form id="form-mensaje" class="chat__form">
-        <textarea id="input-mensaje" placeholder="Escribe tu respuesta…" rows="2" required></textarea>
+        <textarea id="input-mensaje" placeholder="Escribe tu respuesta o razonamiento…" rows="2" required></textarea>
         <div class="chat__acciones">
           <button type="submit" id="btn-enviar">Enviar</button>
-          <button type="button" id="btn-generar-test">Generar nuevo test</button>
+          <button type="button" id="btn-generar-test">Ir a prueba adaptativa</button>
         </div>
       </form>
 

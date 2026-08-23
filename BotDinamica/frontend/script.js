@@ -8,6 +8,12 @@ const inputEstudianteId = document.getElementById('input-estudiante-id');
 const btnIniciar = document.getElementById('btn-iniciar');
 const loginError = document.getElementById('login-error');
 
+const appEstudianteEl = document.getElementById('app-estudiante');
+const progresoEl = document.getElementById('progreso');
+const progresoInicioEl = document.getElementById('progreso-inicio');
+const progresoConversacionEl = document.getElementById('progreso-conversacion');
+const progresoTestEl = document.getElementById('progreso-test');
+
 const mensajesEl = document.getElementById('mensajes');
 const indicadorCargando = document.getElementById('indicador-cargando');
 const formMensaje = document.getElementById('form-mensaje');
@@ -42,6 +48,13 @@ async function iniciarSesion() {
     const datos = await llamarWebApp({ accion: 'iniciar', estudiante_id: estudianteId });
     pantallaLogin.hidden = true;
     pantallaChat.hidden = false;
+
+    appEstudianteEl.textContent = estudianteId;
+    appEstudianteEl.hidden = false;
+    progresoEl.hidden = false;
+    marcarPaso(progresoInicioEl, 'completo');
+    marcarPaso(progresoConversacionEl, 'activo');
+
     agregarMensajeBot(datos.mensaje);
   } catch (error) {
     mostrarError(loginError, 'No se pudo iniciar la sesión: ' + error.message);
@@ -76,6 +89,8 @@ async function generarTest() {
 
   try {
     const datos = await llamarWebApp({ accion: 'generar_test', estudiante_id: estudianteId });
+    marcarPaso(progresoConversacionEl, 'completo');
+    marcarPaso(progresoTestEl, 'activo');
     agregarMensajeSistema('Nuevo test generado: ' + datos.url_formulario);
   } catch (error) {
     mostrarError(chatError, 'No se pudo generar el test: ' + error.message);
@@ -109,7 +124,11 @@ async function llamarWebApp(body) {
 }
 
 function agregarMensajeBot(texto) {
-  agregarMensaje('bot', renderizarMensajeBot(texto));
+  const extraido = extraerOpciones(texto);
+  agregarMensaje('bot', renderizarMensajeBot(extraido.texto));
+  if (extraido.opciones.length >= 2) {
+    agregarOpciones(extraido.opciones);
+  }
 }
 
 function agregarMensajeUsuario(texto) {
@@ -125,6 +144,57 @@ function agregarMensaje(tipo, htmlSeguro) {
   burbuja.className = 'mensaje mensaje--' + tipo;
   burbuja.innerHTML = htmlSeguro;
   mensajesEl.appendChild(burbuja);
+  mensajesEl.scrollTop = mensajesEl.scrollHeight;
+}
+
+/**
+ * Si el bot presentó una pregunta de opción múltiple con líneas
+ * "A) texto", "B) texto"... (el mismo formato que Test.gs usa para armar
+ * el Google Form desde la columna Opciones del Banco), las separa del
+ * texto principal para mostrarlas como tarjetas clicables en vez de texto
+ * plano — más cómodo de leer/responder en el celular.
+ *
+ * @param {string} texto
+ * @return {{texto: string, opciones: Array<{letra: string, texto: string}>}}
+ */
+function extraerOpciones(texto) {
+  const opciones = [];
+  const regex = /^[ \t]*([A-D])\)[ \t]*(.+)$/gm;
+  const textoSinOpciones = texto.replace(regex, function (_, letra, resto) {
+    opciones.push({ letra: letra, texto: resto.trim() });
+    return '';
+  });
+  return {
+    texto: textoSinOpciones.replace(/\n{3,}/g, '\n\n').trim(),
+    opciones: opciones
+  };
+}
+
+/**
+ * Agrega una tarjeta por opción debajo del último mensaje del bot. Al
+ * hacer clic, solo precarga el textarea con la elección (el estudiante
+ * puede completar su razonamiento antes de enviar) — no envía sola,
+ * porque NewtonBot espera que el estudiante justifique su respuesta.
+ */
+function agregarOpciones(opciones) {
+  const contenedor = document.createElement('div');
+  contenedor.className = 'opciones';
+
+  opciones.forEach(function (opcion) {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'opcion';
+    boton.innerHTML = '<span class="opcion__letra">' + opcion.letra + '</span><span>' + escaparHtml(opcion.texto) + '</span>';
+    boton.addEventListener('click', function () {
+      contenedor.querySelectorAll('.opcion').forEach(function (b) { b.classList.remove('is-elegida'); });
+      boton.classList.add('is-elegida');
+      inputMensaje.value = 'Elijo la opción ' + opcion.letra + ') ' + opcion.texto + '. ';
+      inputMensaje.focus();
+    });
+    contenedor.appendChild(boton);
+  });
+
+  mensajesEl.appendChild(contenedor);
   mensajesEl.scrollTop = mensajesEl.scrollHeight;
 }
 
@@ -155,6 +225,11 @@ function escaparHtml(texto) {
 function establecerCargando(cargando) {
   indicadorCargando.hidden = !cargando;
   btnEnviar.disabled = cargando;
+}
+
+function marcarPaso(el, estado) {
+  el.classList.remove('is-activo', 'is-completo');
+  el.classList.add('is-' + estado);
 }
 
 function mostrarError(el, mensaje) {
