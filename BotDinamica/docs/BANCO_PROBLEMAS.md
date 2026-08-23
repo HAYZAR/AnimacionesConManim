@@ -56,17 +56,20 @@ estudiante.
 
 ## Cómo se interpreta `Tipo_Pregunta`
 
-Al generar el Google Form (`Test.gs::crearFormularioTest`):
+Al servir el test al frontend y calificarlo (`Test.gs::obtenerProblemasTest` /
+`calificarTest`):
 
-- Si el valor **contiene** `"OM"` (opción múltiple): se crea un ítem de
-  opción múltiple con las opciones parseadas de `Opciones`, y se autocalifica
-  comparando la letra elegida contra `Respuesta_Correcta`.
+- Si el valor **contiene** `"OM"` (opción múltiple): el frontend muestra las
+  opciones parseadas de `Opciones` como tarjetas A/B/C/D, y se autocalifica
+  en el servidor comparando la letra elegida contra `Respuesta_Correcta`
+  (que nunca se envía al navegador).
 - Si además **contiene** `"Justificaci"` (para cubrir "Justificación" /
-  "Justificacion"): se agrega un segundo ítem de párrafo pidiendo que
-  justifique su respuesta. Ese ítem **no se autocalifica** (queda como
-  `Correcta` vacío en `Resultados`, pendiente de revisión manual).
-- Cualquier otro valor (ej. `Abierta`): se crea un único ítem de párrafo, sin
-  autocalificación.
+  "Justificacion"): el frontend muestra un cuadro de texto adicional pidiendo
+  que justifique su respuesta. Esa justificación **no se autocalifica**
+  (queda como texto libre en `Respuesta_Texto`, pendiente de revisión
+  manual del docente).
+- Cualquier otro valor (ej. `Abierta`): el frontend muestra un único cuadro
+  de texto libre, sin autocalificación.
 
 ## Notas de diseño
 
@@ -81,13 +84,12 @@ Al generar el Google Form (`Test.gs::crearFormularioTest`):
   `Perfil.gs` antes de llamar al LLM (ej. solo enviar los conceptos
   relacionados con las debilidades + una muestra de los demás) — no
   implementado en este MVP.
-- `ID` se usa como llave para: la selección que hace el LLM, el mapeo
-  `Formularios` (qué pregunta corresponde a qué ítem del Form), y la
-  calificación automática al recibir una respuesta de Form.
+- `ID` se usa como llave para: la selección que hace el LLM y la
+  calificación de cada respuesta al recibir el test (`Test.gs::calificarTest`).
 - `Imagen_URL` se usa en dos lugares: `LLM.gs` la reenvía al LLM (dentro del
   banco completo) para que la incluya como Markdown en su mensaje al
-  presentar el problema, y `Test.gs` la descarga y la agrega como
-  `ImageItem` justo antes del ítem de la pregunta al generar el Google Form.
+  presentar el problema, y `Test.gs::obtenerProblemasTest` la incluye tal
+  cual para que el frontend la muestre como `<img>` en la tarjeta del test.
   Ver `docs/IMAGENES.md` para cómo crear y alojar estos diagramas.
 - `Explicacion_Completa` es deliberadamente **texto de uso docente**: las
   reglas estrictas del prompt socrático prohíben que el bot revele la

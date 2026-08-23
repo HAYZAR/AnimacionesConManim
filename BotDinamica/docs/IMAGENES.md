@@ -1,11 +1,14 @@
 # Diagramas para las preguntas (TikZ → PNG → GitHub)
 
 Inspirado en cómo [`Evaluaciones-Saber-11`](https://hayzar.github.io/Evaluaciones-Saber-11/)
-resuelve esto (SVG dibujado a mano dentro de cada pregunta), pero adaptado a
-que NewtonBot también genera un **Google Form real**, que no puede renderizar
-SVG/HTML arbitrario — necesita un archivo de imagen (PNG). Por eso aquí el
-flujo es: **autoría en TikZ → build automático a PNG → hosting en GitHub →
-URL en la columna `Imagen_URL` del Banco**.
+resuelve esto (SVG dibujado a mano dentro de cada pregunta). Aquí se usa
+TikZ compilado a PNG en vez de SVG a mano porque es más rápido de producir
+para diagramas de física (fuerzas, DCL) sin dibujar vector por vector, y un
+PNG vía `<img>` funciona igual de bien tanto en el chat como en el test —
+ambos viven ahora en la misma página HTML (ver `docs/ARQUITECTURA.md`; el
+test ya no se resuelve en un Google Form aparte). El flujo es: **autoría en
+TikZ → build automático a PNG → hosting en GitHub → URL en la columna
+`Imagen_URL` del Banco**.
 
 ## 1. Autoría: escribe el diagrama en TikZ
 
@@ -92,18 +95,19 @@ en el Banco.
   incluya en su mensaje como Markdown `![Diagrama](URL)`. El frontend
   detecta ese patrón y lo convierte en una etiqueta `<img>` real
   (`script.js::renderizarMensajeBot`).
-- **Google Form** (`Test.gs::agregarImagenSiExiste_`): al generar el test,
-  si el problema tiene `Imagen_URL`, se descarga la imagen
-  (`UrlFetchApp.fetch`) y se agrega como un `ImageItem` justo antes del ítem
-  de la pregunta.
+- **Test adaptativo** (`Test.gs::obtenerProblemasTest`): el campo
+  `imagen_url` se incluye tal cual en cada problema que se envía al
+  frontend; `script.js::crearTarjetaPreguntaTest` la agrega como `<img>`
+  arriba de las opciones.
 
 ## Por qué no SVG inline (como en Evaluaciones-Saber-11)
 
-Ese enfoque es más simple cuando *todo* vive en una sola página HTML — no
-hay forma de meter SVG dentro de un Google Form. Como NewtonBot necesita
-generar tests como Forms reales (para que Apps Script pueda calificarlos
-automáticamente), un archivo de imagen de verdad es el mínimo común
-denominador que funciona en ambos lugares (chat y Form). Si en algún momento
-se elimina la generación de Forms y todo el flujo de tests pasa a vivir en
-el propio chat web, ahí sí valdría la pena volver a SVG inline siguiendo el
-patrón de `Evaluaciones-Saber-11`.
+Ese enfoque es válido ahora que todo (chat y test) vive en la misma página
+HTML — ya no hay una restricción técnica que lo impida, como sí la había
+mientras el test se generaba como un Google Form real (que no puede
+renderizar SVG/HTML arbitrario). Se mantiene TikZ → PNG porque ya está
+construido y probado, y porque compilar diagramas de fuerzas/DCL en TikZ es
+más rápido que dibujarlos vector por vector a mano en SVG. Si en el futuro
+se quiere ese nivel de control fino sobre el dibujo, migrar a SVG inline
+siguiendo el patrón de `Evaluaciones-Saber-11` sigue siendo una opción
+razonable — ya no exigiría rehacer el resto de la arquitectura.

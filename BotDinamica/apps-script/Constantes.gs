@@ -6,7 +6,6 @@
 const HOJA_BANCO = 'Banco';
 const HOJA_RESULTADOS = 'Resultados';
 const HOJA_CONVERSACIONES = 'Conversaciones';
-const HOJA_FORMULARIOS = 'Formularios';
 
 const GEMINI_MODELO = 'gemini-2.5-flash';
 const GEMINI_TEMPERATURA = 0.4;

@@ -22,7 +22,20 @@ const btnEnviar = document.getElementById('btn-enviar');
 const btnGenerarTest = document.getElementById('btn-generar-test');
 const chatError = document.getElementById('chat-error');
 
+const pantallaTest = document.getElementById('pantalla-test');
+const testPreguntasEl = document.getElementById('test-preguntas');
+const btnEnviarTest = document.getElementById('btn-enviar-test');
+const btnCancelarTest = document.getElementById('btn-cancelar-test');
+const testError = document.getElementById('test-error');
+
+const pantallaResultados = document.getElementById('pantalla-resultados');
+const resultadosResumenEl = document.getElementById('resultados-resumen');
+const resultadosDetalleEl = document.getElementById('resultados-detalle');
+const btnVolverChat = document.getElementById('btn-volver-chat');
+
 let estudianteId = null;
+let preguntasTestActuales = [];
+let respuestasTestActuales = {};
 
 btnIniciar.addEventListener('click', iniciarSesion);
 inputEstudianteId.addEventListener('keydown', function (ev) {
@@ -33,6 +46,15 @@ formMensaje.addEventListener('submit', function (ev) {
   enviarMensaje();
 });
 btnGenerarTest.addEventListener('click', generarTest);
+btnEnviarTest.addEventListener('click', enviarTest);
+btnCancelarTest.addEventListener('click', function () {
+  pantallaTest.hidden = true;
+  pantallaChat.hidden = false;
+});
+btnVolverChat.addEventListener('click', function () {
+  pantallaResultados.hidden = true;
+  pantallaChat.hidden = false;
+});
 
 async function iniciarSesion() {
   const valor = inputEstudianteId.value.trim();
@@ -89,15 +111,145 @@ async function generarTest() {
 
   try {
     const datos = await llamarWebApp({ accion: 'generar_test', estudiante_id: estudianteId });
-    marcarPaso(progresoConversacionEl, 'completo');
-    marcarPaso(progresoTestEl, 'activo');
-    agregarMensajeSistemaConEnlace('Tu nuevo test está listo:', datos.url_formulario);
+    mostrarPantallaTest(datos.problemas);
   } catch (error) {
     mostrarError(chatError, 'No se pudo generar el test: ' + error.message);
   } finally {
     establecerCargando(false);
     btnGenerarTest.disabled = false;
   }
+}
+
+/**
+ * Muestra la prueba adaptativa dentro del propio chat: una tarjeta por
+ * problema (con su contexto, imagen y opciones si las tiene), en vez de
+ * generar un Google Form aparte.
+ */
+function mostrarPantallaTest(problemas) {
+  preguntasTestActuales = problemas;
+  respuestasTestActuales = {};
+  testPreguntasEl.innerHTML = '';
+
+  problemas.forEach(function (problema, indice) {
+    testPreguntasEl.appendChild(crearTarjetaPreguntaTest(problema, indice));
+  });
+
+  pantallaChat.hidden = true;
+  pantallaTest.hidden = false;
+  ocultarError(testError);
+  marcarPaso(progresoConversacionEl, 'completo');
+  marcarPaso(progresoTestEl, 'activo');
+}
+
+function crearTarjetaPreguntaTest(problema, indice) {
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'pregunta-test';
+
+  let html = '<div class="pregunta-test__meta">Pregunta ' + (indice + 1) + ' de ' +
+    preguntasTestActuales.length + ' — ' + escaparHtml(problema.concepto_principal) + '</div>';
+  if (problema.contexto) {
+    html += '<div class="pregunta-test__contexto">' + escaparHtml(problema.contexto) + '</div>';
+  }
+  html += '<div class="pregunta-test__enunciado">' + escaparHtml(problema.enunciado) + '</div>';
+  if (problema.imagen_url) {
+    html += '<img src="' + escaparHtml(problema.imagen_url) + '" alt="Diagrama">';
+  }
+  tarjeta.innerHTML = html;
+
+  const hayOpciones = problema.opciones && problema.opciones.length > 0;
+
+  if (hayOpciones) {
+    const opcionesEl = document.createElement('div');
+    opcionesEl.className = 'opciones';
+
+    problema.opciones.forEach(function (opcion) {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.className = 'opcion';
+      boton.innerHTML = '<span class="opcion__letra">' + opcion.letra + '</span><span>' + escaparHtml(opcion.texto) + '</span>';
+      boton.addEventListener('click', function () {
+        opcionesEl.querySelectorAll('.opcion').forEach(function (b) { b.classList.remove('is-elegida'); });
+        boton.classList.add('is-elegida');
+        registrarRespuestaTest(problema.id, 'respuesta', opcion.letra);
+      });
+      opcionesEl.appendChild(boton);
+    });
+
+    tarjeta.appendChild(opcionesEl);
+  }
+
+  if (problema.requiere_justificacion || !hayOpciones) {
+    const textarea = document.createElement('textarea');
+    textarea.rows = 2;
+    textarea.placeholder = hayOpciones ? 'Justifica tu respuesta…' : 'Escribe tu respuesta…';
+    const campo = hayOpciones ? 'justificacion' : 'respuesta';
+    textarea.addEventListener('input', function () {
+      registrarRespuestaTest(problema.id, campo, textarea.value);
+    });
+    tarjeta.appendChild(textarea);
+  }
+
+  return tarjeta;
+}
+
+function registrarRespuestaTest(id, campo, valor) {
+  if (!respuestasTestActuales[id]) respuestasTestActuales[id] = {};
+  respuestasTestActuales[id][campo] = valor;
+}
+
+async function enviarTest() {
+  const sinResponder = preguntasTestActuales.filter(function (p) {
+    const r = respuestasTestActuales[p.id] || {};
+    if (!r.respuesta) return true;
+    if (p.requiere_justificacion && !r.justificacion) return true;
+    return false;
+  });
+
+  if (sinResponder.length > 0) {
+    mostrarError(testError, 'Te falta' + (sinResponder.length > 1 ? 'n ' + sinResponder.length + ' preguntas' : ' 1 pregunta') + ' por responder (o justificar).');
+    return;
+  }
+
+  ocultarError(testError);
+  btnEnviarTest.disabled = true;
+
+  const respuestas = preguntasTestActuales.map(function (p) {
+    const r = respuestasTestActuales[p.id] || {};
+    return { id: p.id, respuesta: r.respuesta || '', justificacion: r.justificacion || '' };
+  });
+
+  try {
+    const datos = await llamarWebApp({ accion: 'enviar_test', estudiante_id: estudianteId, respuestas: respuestas });
+    mostrarResultados(datos.resultado);
+  } catch (error) {
+    mostrarError(testError, 'No se pudo enviar el test: ' + error.message);
+  } finally {
+    btnEnviarTest.disabled = false;
+  }
+}
+
+function mostrarResultados(resultado) {
+  pantallaTest.hidden = true;
+  pantallaResultados.hidden = false;
+  marcarPaso(progresoTestEl, 'completo');
+
+  resultadosResumenEl.textContent = resultado.total > 0
+    ? 'Obtuviste ' + resultado.puntaje + ' de ' + resultado.total + ' en las preguntas de opción múltiple. Tu docente revisará tus justificaciones.'
+    : 'Registramos tus respuestas. Tu docente las revisará.';
+
+  resultadosDetalleEl.innerHTML = '';
+  resultado.detalle.forEach(function (item) {
+    const fila = document.createElement('div');
+    fila.className = 'resultados__item';
+
+    let claseIcono = 'resultados__icono';
+    let icono = '•';
+    if (item.correcta === true) { claseIcono += ' resultados__icono--correcta'; icono = '✓'; }
+    else if (item.correcta === false) { claseIcono += ' resultados__icono--incorrecta'; icono = '✗'; }
+
+    fila.innerHTML = '<span class="' + claseIcono + '">' + icono + '</span><span>' + escaparHtml(item.concepto_principal) + '</span>';
+    resultadosDetalleEl.appendChild(fila);
+  });
 }
 
 /**
@@ -133,23 +285,6 @@ function agregarMensajeBot(texto) {
 
 function agregarMensajeUsuario(texto) {
   agregarMensaje('usuario', escaparHtml(texto));
-}
-
-function agregarMensajeSistema(texto) {
-  agregarMensaje('sistema', escaparHtml(texto));
-}
-
-/**
- * Mensaje de sistema con un link real y clicable (ej. el Google Form del
- * test generado). Antes se interpolaba la URL como texto plano escapado,
- * lo que la dejaba visible pero sin poder hacer clic en ella.
- */
-function agregarMensajeSistemaConEnlace(texto, url) {
-  const div = document.createElement('div');
-  div.textContent = url;
-  const urlEscapada = div.innerHTML;
-  const html = escaparHtml(texto) + '<br><a href="' + urlEscapada + '" target="_blank" rel="noopener noreferrer">' + urlEscapada + '</a>';
-  agregarMensaje('sistema', html);
 }
 
 function agregarMensaje(tipo, htmlSeguro) {

@@ -133,7 +133,7 @@ function esVerdadero_(valor) {
 }
 
 // Distingue "autocalificado" (TRUE/FALSE) de "vacío" (pendiente de revisión
-// manual: ítems abiertos o de justificación). Ver Test.gs::onNuevoFormSubmit.
+// manual: ítems abiertos o de justificación). Ver Test.gs::calificarTest.
 function esCalificado_(valor) {
   return valor === true || valor === false || String(valor).toUpperCase() === 'TRUE' || String(valor).toUpperCase() === 'FALSE';
 }

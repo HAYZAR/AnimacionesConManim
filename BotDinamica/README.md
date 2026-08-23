@@ -23,7 +23,7 @@ frontend/  (GitHub Pages: chat HTML/CSS/JS)
 apps-script/  (Google Apps Script, Web App doPost/doGet)
    │  lee/escribe
    ▼
-Google Sheet  ("Banco", "Resultados", "Conversaciones", "Formularios")
+Google Sheet  ("Banco", "Resultados", "Conversaciones")
    │  perfil + banco + historial
    ▼
 Gemini API (gemini-2.5-flash)  ← "cerebro" socrático
@@ -46,9 +46,9 @@ Ver el detalle completo en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
 
 ## Puesta en marcha rápida
 
-1. Crea una Google Sheet nueva con las hojas `Banco`, `Resultados`,
-   `Conversaciones` y `Formularios` (columnas en `docs/BANCO_PROBLEMAS.md`
-   y `docs/ARQUITECTURA.md`).
+1. Crea una Google Sheet nueva con las hojas `Banco`, `Resultados` y
+   `Conversaciones` (columnas en `docs/BANCO_PROBLEMAS.md` y
+   `docs/ARQUITECTURA.md`).
 2. Abre **Extensiones → Apps Script** desde esa hoja y copia el contenido de
    cada archivo de `apps-script/` (mismo nombre de archivo).
 3. En **Configuración del proyecto → Propiedades del script**, agrega
@@ -68,10 +68,10 @@ Implementado:
 - Construcción del perfil del estudiante a partir de `Resultados`.
 - Llamada a Gemini con el prompt socrático + perfil + banco + historial.
 - Historial de conversación persistido en Sheets.
-- Generación dinámica de un Google Form con las preguntas seleccionadas y
-  volcado automático de sus respuestas a `Resultados`.
+- Prueba adaptativa resuelta dentro del propio chat (tarjetas de pregunta +
+  pantalla de resultados), sin salir a un Google Form aparte.
 - Chat web mínimo para GitHub Pages, con soporte para mostrar diagramas
-  (`Imagen_URL`) embebidos en la conversación.
+  (`Imagen_URL`) embebidos en la conversación y en el test.
 - Diagramas de problemas en TikZ, con build automático a PNG vía GitHub
   Actions (ver `docs/IMAGENES.md`).
 

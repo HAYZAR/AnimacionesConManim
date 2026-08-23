@@ -2,7 +2,10 @@
 
 Implementa la **Opción A** del plan original: Google Sheets + Apps Script +
 Gemini API + un chat estático en GitHub Pages. Todo el estado vive en una
-sola Google Sheet, dividida en 4 hojas.
+sola Google Sheet, dividida en 3 hojas.
+
+La prueba adaptativa se resuelve **dentro del propio chat** (no genera un
+Google Form aparte) — ver "Flujo end-to-end" abajo.
 
 ## Hojas de la Google Sheet
 
@@ -11,8 +14,8 @@ Ver [`BANCO_PROBLEMAS.md`](BANCO_PROBLEMAS.md). El banco de problemas, editado
 a mano por el docente.
 
 ### `Resultados`
-Una fila por (intento de) pregunta respondida. La llena automáticamente el
-trigger `onNuevoFormSubmit` (`Test.gs`) cuando un estudiante envía un Form.
+Una fila por pregunta respondida en un test. La llena `Test.gs::calificarTest()`
+cuando el estudiante envía sus respuestas desde el frontend.
 
 | Columna | Descripción |
 |---|---|
@@ -20,9 +23,10 @@ trigger `onNuevoFormSubmit` (`Test.gs`) cuando un estudiante envía un Form.
 | `Estudiante_ID` | Identificador del estudiante (texto libre, ej. `EST-045`). |
 | `ID_Pregunta` | `ID` del `Banco`. |
 | `Concepto_Principal` | Copiado del `Banco` al momento de calificar (para no tener que hacer join después). |
-| `Correcta` | `TRUE` / `FALSE` / vacío (`abierta` sin autocalificar). |
-| `Intentos` | Siempre `1` en el MVP (no hay reintentos dentro del mismo Form). |
+| `Correcta` | `TRUE` / `FALSE` (autocalificado si la pregunta es `OM`) o vacío (preguntas `Abierta`, pendientes de revisión manual). |
+| `Intentos` | Siempre `1` en el MVP (no hay reintentos dentro del mismo test). |
 | `Tipo_Error_Detectado` | Si `Correcta = FALSE`, se copia `Tipo_Error_Diagnostica` del `Banco` como hipótesis de error; el docente puede corregirlo a mano. |
+| `Respuesta_Texto` | Texto libre que escribió el estudiante: la letra elegida y/o su justificación (ej. `"B — Porque está en equilibrio."`). Para que el docente pueda revisar el razonamiento, no solo si acertó. |
 
 `Perfil.gs::construirPerfilEstudiante()` lee esta hoja completa filtrando por
 `Estudiante_ID`.
@@ -40,20 +44,6 @@ Historial de chat, una fila por turno.
 `Conversaciones.gs` expone `guardarMensaje()` y `obtenerHistorialReciente(n)`
 (por defecto los últimos 10 turnos, ver `Constantes.gs`).
 
-### `Formularios`
-Mapeo entre un Google Form generado dinámicamente y el estudiante/preguntas
-que contiene, para poder calificar automáticamente al recibir respuestas.
-
-| Columna | Descripción |
-|---|---|
-| `Form_ID` | ID del Form creado (`FormApp.create(...).getId()`). |
-| `Estudiante_ID` | Para quién se creó. |
-| `Timestamp_Creacion` | Cuándo se generó. |
-| `Mapa_Items_JSON` | JSON con `[{item_id, banco_id, concepto_principal, tipo_item, respuesta_correcta}, ...]` — `tipo_item` es `'multiple'` (autocalificable), `'parrafo_justificacion'` o `'abierta'` (ambas pendientes de revisión manual). |
-
-`Test.gs::crearFormularioTest()` escribe esta fila; el trigger
-`onNuevoFormSubmit` la lee para saber cómo calificar cada respuesta.
-
 ## Flujo end-to-end
 
 1. **Primer contacto / nueva sesión** (`accion: "iniciar"` en el Web App):
@@ -67,8 +57,9 @@ que contiene, para poder calificar automáticamente al recibir respuestas.
       (ver `PROMPT_SOCRATICO.md`).
    5. Se guarda el turno `model` en `Conversaciones`.
    6. Se devuelve al frontend `{ mensaje: mensaje_inicial }`. Los
-      `ids_seleccionados` quedan disponibles para cuando el docente/bot pida
-      generar el siguiente test (`accion: "generar_test"`).
+      `ids_seleccionados` quedan disponibles (en Propiedades del script, ver
+      `LLM.gs::guardarSeleccionIds_`) para cuando se pida el test
+      (`accion: "generar_test"`).
 
 2. **Turno de conversación** (`accion: "mensaje"`):
    1. `Conversaciones.gs::guardarMensaje(estudiante_id, "user", mensaje)`.
@@ -78,27 +69,36 @@ que contiene, para poder calificar automáticamente al recibir respuestas.
       alternados `user`/`model`).
    4. Se guarda la respuesta como turno `model` y se devuelve al frontend.
 
-3. **Generar/asignar nuevo test** (`accion: "generar_test"`, con los
-   `ids_seleccionados` de la sesión):
-   1. `Test.gs::crearFormularioTest(estudiante_id, ids)` crea un Form nuevo,
-      agrega un item por cada `ID` (tipo según `Tipo_Pregunta`), guarda el
-      mapeo en `Formularios`, e instala el trigger `onFormSubmit` para ese
-      Form específico.
-   2. Devuelve la URL pública del Form al frontend, que la muestra como
-      enlace al estudiante.
-   3. Cuando el estudiante responde el Form, `onNuevoFormSubmit` (instalado
-      por Form) se dispara, califica automáticamente lo autocalificable y
-      escribe filas nuevas en `Resultados`. Así el próximo `iniciar` ya ve
-      un perfil actualizado.
+3. **Generar el test adaptativo** (`accion: "generar_test"`):
+   1. `Test.gs::obtenerProblemasTest(ids)` arma, para cada ID seleccionado,
+      la versión "segura para el navegador" del problema:
+      `{ id, concepto_principal, contexto, enunciado, tipo_pregunta,
+      opciones, requiere_justificacion, imagen_url }` — **sin**
+      `Respuesta_Correcta` ni `Explicacion_Completa` (el frontend es código
+      público; nunca deben viajar al navegador).
+   2. El frontend renderiza una tarjeta por problema (reutilizando el mismo
+      componente de opciones A/B/C/D del chat) y recolecta las respuestas.
+
+4. **Enviar el test** (`accion: "enviar_test"`, con `respuestas: [{id,
+   respuesta, justificacion}, ...]`):
+   1. `Test.gs::calificarTest(estudiante_id, respuestas)` compara cada
+      respuesta contra `Respuesta_Correcta` del `Banco` (esto sí ocurre en
+      el servidor) y escribe una fila por problema en `Resultados`.
+   2. Devuelve `{ puntaje, total, detalle }` para que el frontend muestre
+      una pantalla de resultados. Así el próximo `iniciar` ya ve un perfil
+      actualizado.
 
 ## Por qué esta arquitectura y no otra
 
 - **Todo en Apps Script** evita tener que operar un backend separado
   (servidor, hosting, autenticación de servicio) — encaja con el "tier
-  gratuito" del plan y con que el docente ya usa Sheets/Forms.
-- **Gemini 1.5 Flash** por costo/latencia; el código en `LLM.gs` es
+  gratuito" del plan y con que el docente ya usa Sheets.
+- **Gemini 2.5 Flash** por costo/latencia; el código en `LLM.gs` es
   intercambiable por Claude/OpenAI cambiando solo el cuerpo de la función
   que arma el `payload` y el endpoint.
-- **Un Form nuevo por sesión de test** (en vez de reusar un único Form
-  gigante) permite que cada estudiante reciba exactamente el subconjunto de
-  preguntas que el LLM seleccionó, sin exponerle el resto del banco.
+- **El test se resuelve dentro del chat** (no en un Google Form aparte):
+  la primera versión sí generaba un Form nuevo por sesión, pero eso sacaba
+  al estudiante de la experiencia socrática justo al momento de resolver
+  los problemas — se cambió para mantener todo en una sola interfaz.
+  `Respuesta_Correcta`/`Explicacion_Completa` nunca se envían al frontend;
+  la calificación ocurre siempre en Apps Script.

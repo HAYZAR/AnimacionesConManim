@@ -32,8 +32,11 @@ function doPost(e) {
  * Acciones soportadas:
  *  - "iniciar": { accion, estudiante_id } -> inicia/reinicia una sesión.
  *  - "mensaje": { accion, estudiante_id, mensaje } -> turno de conversación.
- *  - "generar_test": { accion, estudiante_id } -> crea el Form con la
- *      última selección de IDs para ese estudiante.
+ *  - "generar_test": { accion, estudiante_id } -> devuelve las preguntas de
+ *      la última selección para resolverlas dentro del chat (sin
+ *      Respuesta_Correcta ni Explicacion_Completa).
+ *  - "enviar_test": { accion, estudiante_id, respuestas } -> califica las
+ *      respuestas y las guarda en Resultados.
  *
  * @param {Object} body
  * @return {Object} Respuesta serializable a JSON.
@@ -62,8 +65,16 @@ function enrutarAccion_(body) {
     if (!ids || ids.length === 0) {
       return { ok: false, error: 'No hay una selección de preguntas activa. Inicia una sesión primero.' };
     }
-    const urlForm = crearFormularioTest(estudianteId, ids);
-    return { ok: true, url_formulario: urlForm };
+    const problemas = obtenerProblemasTest(ids);
+    return { ok: true, problemas: problemas };
+  }
+
+  if (accion === 'enviar_test') {
+    if (!Array.isArray(body.respuestas) || body.respuestas.length === 0) {
+      return { ok: false, error: 'Falta respuestas.' };
+    }
+    const resultado = calificarTest(estudianteId, body.respuestas);
+    return { ok: true, resultado: resultado };
   }
 
   return { ok: false, error: 'Acción desconocida: ' + accion };
