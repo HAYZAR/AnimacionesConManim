@@ -2,6 +2,7 @@
 % Figuras simples con trazos (sin fuentes/emoji) para evitar depender de
 % paquetes extra en el build de CI (solo tikz estándar).
 \documentclass[tikz,border=3pt]{standalone}
+\usetikzlibrary{arrows.meta}
 \begin{document}
 \begin{tikzpicture}[>=Latex, thick, font=\large]
   \draw[line width=2.5pt, brown] (-2.2,0) -- (2.2,0);
