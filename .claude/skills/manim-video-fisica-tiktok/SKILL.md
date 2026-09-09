@@ -210,32 +210,56 @@ centrar un texto respecto a varios elementos, usa el grupo completo:
 - El gancho (primeros 1-2s) debe funcionar solo con el texto en pantalla, sin depender
   del audio.
 
-## 5.5 Generar la narración en voz en off (TTS local, sin internet)
+## 5.5 Generar la narración en voz en off (TTS)
 
 Cuando el usuario pida "crear audio"/narración y no tenga una grabación propia, se
-puede generar una voz en off local con `espeak-ng` + `mbrola` (sin depender de APIs de
-pago ni de internet) sincronizada con el timing REAL del render — no con las marcas de
-tiempo del GUION.md, que suelen quedar desactualizadas después de ajustar el ritmo
-(sección 2.1, paso 4).
+puede generar una voz en off sincronizada con el timing REAL del render — no con las
+marcas de tiempo del GUION.md, que suelen quedar desactualizadas después de ajustar el
+ritmo (sección 2.1, paso 4). Hay dos backends, elegidos con la variable de entorno
+`TTS_BACKEND` al correr `scripts/generar_audio.py`:
 
-**Instalación** (Linux, vía apt; en Windows busca "espeak-ng" y una voz mbrola en
-español para tu gestor de paquetes, o usa la voz `es-419` de espeak puro si no
-consigues mbrola):
+- **`espeak` (por defecto): 100% offline**, sin internet ni cuentas, con `espeak-ng` +
+  `mbrola`. No existe voz mbrola colombiana — usa `mb-vz1` (venezolano) como la más
+  cercana disponible. Sirve como borrador funcional en cualquier entorno, incluidos
+  entornos en la nube sin salida a internet a servicios de Microsoft/Google/etc.
+- **`edge`: voces neuronales reales, gratis, sin API key**, usando el motor "Leer en
+  voz alta" de Microsoft Edge (paquete `edge-tts` de PyPI). Tiene voces colombianas
+  reales (`es-CO-GonzaloNeural` masculina, `es-CO-SalomeNeural` femenina). Requiere
+  `pip install edge-tts` e internet — el dominio que usa (`speech.platform.bing.com`)
+  suele estar bloqueado en entornos en la nube con políticas de red restrictivas (igual
+  que Azure), pero funciona sin problema en una máquina normal (Windows/Mac/Linux) con
+  internet abierto — por ejemplo, corriendo el flujo completo de Manim de esta skill en
+  tu propia PC.
+
+**Instalación backend `espeak` (Linux, vía apt; en Windows busca "espeak-ng" y una voz
+mbrola en español para tu gestor de paquetes, o usa la voz `es-419` de espeak puro si
+no consigues mbrola):**
 
 ```bash
 sudo apt-get install espeak-ng espeak-ng-data mbrola mbrola-es4   # o mbrola-es3 (voz femenina)
 ```
 
+**Instalación backend `edge` (cualquier plataforma con internet):**
+
+```bash
+pip install edge-tts
+```
+
 **Flujo:**
 
 1. Escribe `narracion.json` en la carpeta del video: un objeto `{"nombre_metodo": "texto de la narración"}` por cada método llamado en `construct()`, en el mismo orden. El texto debe ser conciso — la voz sintetizada suele hablar más lento de lo que cabe en un `self.wait()` ajustado a los ojos, así que prefiere frases cortas.
-2. Corre `scripts/generar_audio.py <carpeta_video> <archivo.py> <Clase> <video.mp4> <salida.mp4>`. El script:
+2. Corre `scripts/generar_audio.py <carpeta_video> <archivo.py> <Clase> <video.mp4> <salida.mp4>`. Por defecto usa `espeak`; para voz colombiana neuronal real:
+   ```bash
+   TTS_BACKEND=edge TTS_VOICE=es-CO-GonzaloNeural python3 generar_audio.py <carpeta_video> <archivo.py> <Clase> <video.mp4> <salida.mp4>
+   # o TTS_VOICE=es-CO-SalomeNeural para voz femenina
+   ```
+   El script:
    - Usa `scripts/tts_timing.py` (análisis estático del AST) para calcular en qué segundo real empieza cada método — sigue las llamadas a métodos ayudantes (`self.mover_x(...)`, etc.) de forma recursiva, así que no hace falta instrumentar el código.
-   - Sintetiza cada bloque de texto con `espeak-ng`.
+   - Sintetiza cada bloque de texto con el backend elegido.
    - Si un bloque de voz dura más que su escena, el siguiente bloque se retrasa lo necesario para que **nunca se superpongan dos voces** (aunque eso desincronice un poco el audio del video en esa zona) — revisa la salida del script: marca `⚠ excede el beat` y `↪ retrasado`.
    - Mezcla todo en una sola pista y la combina con el video (copia el video tal cual, solo agrega/reemplaza el audio).
-3. **Si el último bloque de texto termina después de que acaba el video, se corta** (el mux usa `-shortest`). Si ves `↪ retrasado` acumulándose hasta el final, acorta el texto de los bloques marcados `⚠ excede el beat` en `narracion.json` y vuelve a correr el script — no subas la velocidad de la voz por encima de ~180-190, se vuelve difícil de entender.
-4. Escucha (o al menos revisa la duración de) el resultado antes de darlo por bueno — esta voz sintética es un primer borrador funcional, no un reemplazo de una locución grabada por una persona.
+3. **Si el último bloque de texto termina después de que acaba el video, se corta** (el mux usa `-shortest`). Si ves `↪ retrasado` acumulándose hasta el final, acorta el texto de los bloques marcados `⚠ excede el beat` en `narracion.json` y vuelve a correr el script — con `espeak` no subas la velocidad por encima de ~180-190 wpm (se vuelve difícil de entender); con `edge` usa `TTS_RATE=+10%` (o similar) en vez de acortar tanto texto.
+4. Escucha (o al menos revisa la duración de) el resultado antes de darlo por bueno. `espeak` es un borrador funcional, no un reemplazo de una locución humana; `edge` ya suena natural pero sigue siendo TTS — revisa que no queden errores de pronunciación en tecnicismos.
 
 ## 6. Recursos incluidos en esta skill
 
