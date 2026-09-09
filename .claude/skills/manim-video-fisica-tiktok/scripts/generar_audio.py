@@ -17,7 +17,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from tts_timing import Evaluator  # noqa: E402
 
-VOZ = "mb/mb-mx2"  # español latino (mexicano); alternativas: mb-mx1, mb-vz1 (venezolano), mb-es4 (España)
+VOZ = "mb/mb-vz1"  # español venezolano (la variante mbrola offline mas cercana a Colombia
+# disponible; no existe una voz mbrola colombiana). Alternativas: mb-mx1/mb-mx2
+# (mexicano), mb-es4 (España). Para un acento colombiano autentico hace falta un
+# TTS en la nube (Google/Azure/Amazon tienen locale es-CO) corrido con internet,
+# no disponible offline aqui.
 VELOCIDAD = "175"  # palabras por minuto aprox
 
 # Requiere: espeak-ng + mbrola + una voz mbrola en español (p.ej. mbrola-es4),
