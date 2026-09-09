@@ -1,0 +1,12 @@
+{
+  "hook": "Empujas estos dos bloques con 12 newtons. El de atrás siente 4. Cambias de lado, mismos 12 newtons... ¡y ahora siente 8!",
+  "plantear_problema": "Dos bloques en contacto: uno de 2 kilos, otro de 1 kilo, empujados con 12 newtons, sobre una superficie sin fricción.",
+  "sistema_completo": "Tratamos los dos bloques como un solo sistema: la fuerza entre la masa total. 12 entre 3, cuatro metros por segundo cuadrado.",
+  "aislar_bloque_pequeno": "Ahora aislamos solo al bloque de atrás. La única fuerza horizontal que actúa sobre él es el contacto con el otro bloque: 1 kilo por 4, cuatro newtons.",
+  "tercera_ley": "Si aíslas el otro bloque, la cuenta da exactamente los mismos 4 newtons en sentido opuesto. Esa es la tercera ley de Newton.",
+  "invertir_orden": "Si en cambio empujas al bloque pequeño, la aceleración del sistema sigue siendo la misma, cuatro. Pero ahora el contacto tiene que acelerar al bloque grande: 2 kilos por 4... ¡8 newtons! El doble.",
+  "reflexion": "La aceleración del sistema nunca cambió. Lo que cambió fue cuánta masa tenía que acelerar el contacto en cada caso.",
+  "con_friccion": "Si ahora hay una fricción total de 3 newtons sobre el sistema, la aceleración baja a 3 metros por segundo cuadrado.",
+  "reto_final": "Tu reto: si la fuerza aplicada fuera exactamente igual a la fricción, ¿qué le pasaría a la aceleración? Coméntalo abajo.",
+  "cierre": "Con esto cerramos la serie completa de la segunda ley de Newton. Gracias por seguirla."
+}
