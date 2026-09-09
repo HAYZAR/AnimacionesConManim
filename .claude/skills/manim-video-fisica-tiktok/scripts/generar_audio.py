@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from tts_timing import Evaluator  # noqa: E402
 
-VOZ = "mb/mb-es4"
+VOZ = "mb/mb-mx2"  # español latino (mexicano); alternativas: mb-mx1, mb-vz1 (venezolano), mb-es4 (España)
 VELOCIDAD = "175"  # palabras por minuto aprox
 
 # Requiere: espeak-ng + mbrola + una voz mbrola en español (p.ej. mbrola-es4),
