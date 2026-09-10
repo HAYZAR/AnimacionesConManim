@@ -1,0 +1,10 @@
+{
+  "hook": "¿Qué ángulo exacto hace que este bloque pase de estar completamente quieto... a acelerar de golpe?",
+  "plantear_problema": "Tenemos un bloque de 2 kilos sobre un plano inclinado, con un coeficiente de fricción estática de 0.6 y uno cinético de 0.4.",
+  "dcl": "Para saber si el bloque se mueve, dibujamos el diagrama de cuerpo libre: el peso que lo hala hacia abajo, la normal, y la fricción.",
+  "descomponer_peso": "El peso siempre se descompone en dos partes: una componente lo empuja plano abajo, haciendo que tienda a deslizar, y la otra lo aprieta perpendicularmente contra la superficie.",
+  "comparar_30": "A 30 grados, la fuerza que lo empuja es de 9.8 newtons, pero la fricción estática máxima aguanta 10.19. Por muy poco... no se mueve.",
+  "subir_a_35_y_deslizar": "Pero si inclinamos el plano solo 5 grados más, hasta 35, la fuerza que empuja ya supera a la fricción estática máxima. Ahora usamos la segunda ley de Newton con la fricción cinética... y el bloque acelera a 2.41 metros por segundo, cada segundo.",
+  "estrategia": "Esta es la estrategia para cualquier problema de fricción: diagrama de cuerpo libre, comparas con la fricción estática máxima, y si se mueve, aplicas la segunda ley con la cinética.",
+  "reto_final": "Tu reto: ¿cuál es el ángulo crítico exacto en el que este bloque empieza a deslizar? Coméntalo abajo. Física en sesenta segundos, parte uno. Sígueme para la parte dos."
+}

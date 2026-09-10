@@ -1,0 +1,12 @@
+{
+  "hook": "Halas este carro con 10 newtons y acelera a 10. Cuelgas un peso de 10 newtons... y solo acelera a 5. Misma fuerza, mitad de aceleración. ¿Por qué?",
+  "plantear_problema": "Un carro de 1 kilo, sobre una mesa sin fricción, conectado por una cuerda y una polea ideal a pesas de 10 newtons cada una.",
+  "caso_a_fuerza_directa": "Si solo hay una mano halando, la segunda ley es directa: la fuerza entre la masa del carro. Diez entre uno, diez metros por segundo cuadrado.",
+  "introducir_polea": "Ahora la fuerza la produce una pesa, no una mano. La cuerda no se estira: el carro y la pesa siempre se mueven igual de rápido.",
+  "caso_b_una_pesa": "Tratamos carro y pesa como un solo sistema: la tensión se cancela. Solo cuenta el peso de la pesa, 10 newtons, repartidos entre 2 kilos. Cinco metros por segundo cuadrado.",
+  "por_que_es_la_mitad": "Por eso es la mitad: esos 10 newtons ya no solo mueven al carro, también tienen que acelerar a la pesa que los produce.",
+  "montaje_mas_pesas": "Con dos pesas, la aceleración sube a 6.67 metros por segundo cuadrado. Con tres, sube a 7.5. Cada pesa nueva empuja más... pero también pesa más.",
+  "reto_limite": "Tu reto: si cuelgas muchísimas pesas, casi infinitas, ¿a qué valor exacto se acerca la aceleración? Piénsalo y coméntalo abajo.",
+  "estrategia": "La estrategia: si dos cuerpos están conectados por una cuerda ideal, trátalos como un solo sistema. Solo importa la fuerza externa que no se cancela.",
+  "cierre": "Física en sesenta segundos, parte tres. Sígueme para la parte cuatro."
+}
