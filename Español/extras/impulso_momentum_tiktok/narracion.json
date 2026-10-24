@@ -1,0 +1,12 @@
+{
+  "hook": "¿Por qué una bolsa de aire te golpea con diez veces menos fuerza, si chocaste exactamente igual de fuerte?",
+  "plantear_problema": "Un conductor de 80 kilos viaja a 20 metros por segundo y tiene que quedar completamente detenido.",
+  "concepto_momentum": "Todo lo que se mueve tiene cantidad de movimiento: su masa por su velocidad.",
+  "concepto_impulso": "Para detenerlo hay que quitarle ese movimiento, y eso se paga con fuerza por el tiempo de frenado. Ese impulso, 1600, es siempre el mismo.",
+  "comparar_volante_bolsa": "Si frena en dos centésimas de segundo contra el volante, la fuerza es de 80 mil newtons. Si la bolsa estira ese frenado a dos décimas, la fuerza baja a solo 8 mil: diez veces menos.",
+  "la_trampa": "La trampa: pensar que la bolsa reduce el golpe total. Falso: el impulso, 1600, es el mismo. Solo cambia cuánto tiempo tarda.",
+  "analogia": "Por eso un colchón duele menos que el piso: el golpe es el mismo, pero tienes más tiempo para frenar.",
+  "estrategia": "La estrategia: calculas el impulso con la masa y el cambio de velocidad, decides cuánto tiempo dura el frenado, y de ahí sale la fuerza.",
+  "reto_final": "Tu reto: si tardara el doble, 0.4 segundos, ¿cuánto valdría la fuerza? Coméntalo abajo.",
+  "cierre": "No evitas el golpe. Lo estiras en el tiempo. Física en sesenta segundos, parte seis."
+}
