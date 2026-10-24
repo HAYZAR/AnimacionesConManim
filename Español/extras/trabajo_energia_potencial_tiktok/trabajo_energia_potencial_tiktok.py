@@ -69,7 +69,7 @@ class TrabajoEnergiaPotencialTikTok(Scene):
     # ------------------------------------------------------------------
     def crear_escenario(self):
         H_VIS = 1.6
-        L_HORIZ = 2.6
+        L_HORIZ = 2.2
         self.H_VIS = H_VIS
 
         self.base_line = Line(LEFT * 2.0, RIGHT * 2.0, color=GREY_B, stroke_width=4)
@@ -81,10 +81,16 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         self.punto_base = punto_base
         self.punto_alto = punto_alto
 
+        # Angulo de la rampa (invariante bajo escalado/traslado uniforme, asi
+        # que es seguro calcularlo una sola vez aqui y reusarlo mas adelante,
+        # aunque el escenario completo se mueva/escale despues).
+        delta = punto_alto - punto_base
+        self.angle_rampa = np.arctan2(delta[1], delta[0])
+
         # Camion simplificado: cuerpo rectangular + 2 ruedas, plataforma a la
         # altura de punto_alto.
         camion = Rectangle(
-            width=1.9, height=H_VIS, stroke_color=WHITE, stroke_width=3,
+            width=1.5, height=H_VIS, stroke_color=WHITE, stroke_width=3,
             fill_color=GREY_D, fill_opacity=0.9,
         )
         camion.shift(punto_alto - camion.get_corner(UL))
@@ -103,8 +109,12 @@ class TrabajoEnergiaPotencialTikTok(Scene):
             punto_base, punto_base + UP * H_VIS, color=COLOR_PESO, stroke_width=5,
         )
 
+        # La caja va INCLINADA, alineada con la superficie de la rampa (no
+        # parada en vertical) -- se rota una vez y la rotacion persiste en
+        # cualquier shift()/move_to() posterior.
         self.caja_rampa = Square(side_length=0.42, color=WHITE, fill_color=COLOR_CAJA, fill_opacity=0.95)
-        self.caja_rampa.next_to(punto_base, UP, buff=0)
+        self.caja_rampa.rotate(self.angle_rampa)
+        self.caja_rampa.move_to(punto_base + self.normal_rampa() * 0.21)
 
         # NOTA: la caja vertical y la linea "misma altura" se crean mas
         # adelante en comparar_caminos(), a partir de la posicion EN VIVO de
@@ -118,6 +128,13 @@ class TrabajoEnergiaPotencialTikTok(Scene):
             self.base_line, self.camion, self.rampa, self.camino_vertical, self.caja_rampa,
         )
 
+    def normal_rampa(self):
+        """Vector unitario perpendicular a la rampa, hacia el lado de ARRIBA
+        (el lado donde descansa la caja). Usa self.angle_rampa, que no
+        cambia aunque el escenario se escale/mueva despues."""
+        theta = self.angle_rampa
+        return np.array([-np.sin(theta), np.cos(theta), 0.0])
+
     # ------------------------------------------------------------------
     # 0:00 - 0:08  Hook
     # ------------------------------------------------------------------
@@ -129,14 +146,18 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         interrogante.move_to(VGroup(self.rampa, self.camino_vertical).get_center() + UP * 0.2)
 
         hook_text = cap_width(Text(
-            "¿Subir esta caja por la rampa\ncuesta MENOS trabajo que\nlevantarla derecho?",
+            "¿Subir esta caja por la rampa\ncuesta MENOS trabajo que\nlevantarla derecho? 🤔",
             font_size=30, weight=BOLD, line_spacing=1.1,
         )).to_edge(UP, buff=0.9)
 
-        self.play(FadeIn(grupo), run_time=0.8)
-        self.play(Write(hook_text), FadeIn(interrogante, scale=1.3), run_time=1.2)
-        self.play(Wiggle(interrogante, scale_value=1.15), run_time=0.8)
-        self.wait(2.5)
+        self.play(FadeIn(grupo, scale=1.08, rate_func=rate_functions.ease_out_back), run_time=0.6)
+        self.play(
+            FadeIn(hook_text, scale=1.15, rate_func=rate_functions.ease_out_back),
+            FadeIn(interrogante, scale=1.6, rate_func=rate_functions.ease_out_back),
+            run_time=0.9,
+        )
+        self.play(Wiggle(interrogante, scale_value=1.25, rotation_angle=0.03 * TAU), run_time=0.8)
+        self.wait(2.2)
 
         self.play(FadeOut(hook_text), FadeOut(interrogante))
         self.hook_group = grupo
@@ -187,9 +208,19 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         )
         self.wait(2.0)
 
-        self.play(FadeOut(flecha_empuje), FadeOut(formula_corta))
+        self.play(FadeOut(flecha_empuje))
         self.caja_rampa.shift(-direccion * 0.5)
-        self.wait(2.5)
+
+        # La formula se encoge y "aterriza" en una tarjeta fija en la esquina
+        # superior -- queda ahi como recordatorio visual del resto del video,
+        # en vez de desaparecer para siempre.
+        mini_w = MathTex(r"W = F \cdot d", color=COLOR_ENERGIA).scale(0.5)
+        fondo_w = SurroundingRectangle(mini_w, color=YELLOW, buff=0.15)
+        tarjeta_w = VGroup(fondo_w, mini_w).to_corner(UR, buff=0.4)
+
+        self.play(ReplacementTransform(formula_corta, mini_w), FadeIn(fondo_w), run_time=0.8)
+        self.formula_card = tarjeta_w
+        self.wait(1.7)
 
     # ------------------------------------------------------------------
     # 0:26 - 0:38  Razonamiento proporcional (ejemplo aparte, abstracto)
@@ -248,7 +279,7 @@ class TrabajoEnergiaPotencialTikTok(Scene):
 
         self.play(Write(etiqueta_f_rampa), run_time=0.6)
         self.play(
-            self.caja_rampa.animate.move_to(self.rampa.get_end() + DOWN * 0.3),
+            self.caja_rampa.animate.move_to(self.rampa.get_end() + self.normal_rampa() * 0.21),
             run_time=1.4,
         )
 
@@ -286,7 +317,12 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         igual.next_to(marco, DOWN, buff=0.4)
 
         self.play(Create(marco), run_time=0.5)
-        self.play(Write(igual), Flash(marco.get_center(), color=YELLOW, flash_radius=1.0), run_time=0.9)
+        self.play(
+            Write(igual),
+            Flash(marco.get_center(), color=YELLOW, flash_radius=1.2, line_length=0.4),
+            Indicate(self.escenario, scale_factor=1.04, color=YELLOW),
+            run_time=0.9,
+        )
         self.wait(2.2)
 
         self.play(
@@ -311,7 +347,24 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         formula_pe = cap_width(MathTex(r"PE = \text{Peso} \times h = mgh").scale(0.85))
         formula_pe.next_to(frase, DOWN, buff=0.7)
         self.play(Write(formula_pe), run_time=1.0)
-        self.wait(1.2)
+        self.wait(1.0)
+
+        # Se agrega una segunda linea a la tarjeta de formulas (sigue en la
+        # esquina desde definir_trabajo()).
+        mini_pe = MathTex(r"PE = mgh", color=COLOR_ENERGIA).scale(0.5)
+        mini_w_copia = self.formula_card[1].copy()
+        grupo_texto = VGroup(mini_w_copia, mini_pe).arrange(DOWN, buff=0.18, aligned_edge=LEFT)
+        fondo_nuevo = SurroundingRectangle(grupo_texto, color=YELLOW, buff=0.15)
+        tarjeta_nueva = VGroup(fondo_nuevo, grupo_texto).to_corner(UR, buff=0.4)
+
+        self.play(
+            FadeOut(self.formula_card),
+            TransformFromCopy(formula_pe, mini_pe),
+            FadeIn(fondo_nuevo), FadeIn(mini_w_copia),
+            run_time=0.9,
+        )
+        self.formula_card = tarjeta_nueva
+        self.wait(0.2)
 
         joule = cap_width(MathTex(r"1\ J = 1\ N \cdot 1\ m").scale(0.7))
         joule.next_to(formula_pe, DOWN, buff=0.6)
@@ -364,22 +417,25 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         )).next_to(caja_grupo, DOWN, buff=0.5)
 
         self.play(Write(reto_titulo), run_time=0.6)
-        self.play(FadeIn(caja_grupo, scale=1.1), run_time=0.6)
+        self.play(FadeIn(caja_grupo, scale=1.3, rate_func=rate_functions.ease_out_back), run_time=0.7)
         self.play(FadeIn(reto_texto, shift=UP * 0.2), run_time=0.8)
         self.wait(3.5)
 
-        self.play(FadeOut(reto_titulo), FadeOut(caja_grupo), FadeOut(reto_texto))
+        self.play(
+            FadeOut(reto_titulo), FadeOut(caja_grupo), FadeOut(reto_texto),
+            FadeOut(self.formula_card),
+        )
 
     # ------------------------------------------------------------------
     # 1:22 - 1:26  Cierre
     # ------------------------------------------------------------------
     def cierre(self):
         cierre_texto = cap_width(Text(
-            "Física en 60s — Parte 5\nSígueme para más física 👀",
+            "Física en 60s — Parte 5 🔥\nSígueme para más física 👀",
             font_size=24, line_spacing=1.2,
         ))
-        self.play(Write(cierre_texto), run_time=1.0)
-        self.wait(3.0)
+        self.play(FadeIn(cierre_texto, scale=1.1, rate_func=rate_functions.ease_out_back), run_time=0.8)
+        self.wait(3.2)
 
 
 def dir_rampa(punto_base, punto_alto):
