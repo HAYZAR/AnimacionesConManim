@@ -156,7 +156,11 @@ def main():
     for i, (start, wav_path, d) in enumerate(clips, start=1):
         inputs += ["-i", str(wav_path)]
         delay_ms = int(start * 1000)
-        filtros.append(f"[{i}]adelay={delay_ms}|{delay_ms}[a{i}]")
+        # aresample=44100 ANTES del adelay: espeak-ng/mbrola genera a 16000 Hz
+        # (edge-tts genera mp3 a otra tasa tambien); sin este resample
+        # explicito, amix mezcla tasas distintas y el audio final queda
+        # reproduciendose mucho mas lento de lo real (bug real, no es la voz).
+        filtros.append(f"[{i}]aresample=44100,adelay={delay_ms}|{delay_ms}[a{i}]")
         mix_labels.append(f"[a{i}]")
     filtros.append(f"{''.join(mix_labels)}amix=inputs={len(mix_labels)}:duration=first:dropout_transition=0:normalize=0[aout]")
     filtro_completo = ";".join(filtros)
