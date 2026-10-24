@@ -51,6 +51,14 @@ def cap_width(mobject, max_width=3.9):
     return mobject
 
 
+# Colores de las etiquetas de "fase" (esquina superior izquierda) -- marcan
+# en que paso del proceso va el video, igual que un indicador de progreso.
+COLOR_FASE_DATOS = BLUE_C
+COLOR_FASE_FORMULA = GREEN_C
+COLOR_FASE_DESARROLLO = PURPLE_B
+COLOR_FASE_RESULTADO = COLOR_ENERGIA
+
+
 class TrabajoEnergiaPotencialTikTok(Scene):
     def construct(self):
         self.crear_escenario()
@@ -135,6 +143,21 @@ class TrabajoEnergiaPotencialTikTok(Scene):
         theta = self.angle_rampa
         return np.array([-np.sin(theta), np.cos(theta), 0.0])
 
+    def mostrar_fase(self, texto, color, run_time=0.4):
+        """Etiqueta de fase fija en la esquina superior izquierda (Datos /
+        Formula / Desarrollo / Resultado), para que el video se sienta como
+        un proceso con pasos claros en vez de una sucesion de escenas
+        sueltas. Reemplaza la etiqueta anterior si ya habia una."""
+        nuevo_texto = Text(texto, font_size=16, weight=BOLD, color=color)
+        fondo = SurroundingRectangle(nuevo_texto, color=color, buff=0.12)
+        nueva_fase = VGroup(fondo, nuevo_texto).to_corner(UL, buff=0.35)
+
+        animaciones = [FadeIn(nueva_fase, shift=RIGHT * 0.15)]
+        if hasattr(self, "fase_actual"):
+            animaciones.append(FadeOut(self.fase_actual, shift=RIGHT * 0.15))
+        self.play(*animaciones, run_time=run_time)
+        self.fase_actual = nueva_fase
+
     # ------------------------------------------------------------------
     # 0:00 - 0:08  Hook
     # ------------------------------------------------------------------
@@ -167,6 +190,7 @@ class TrabajoEnergiaPotencialTikTok(Scene):
     # ------------------------------------------------------------------
     def plantear_problema(self):
         self.play(self.hook_group.animate.scale(0.8).to_edge(DOWN, buff=1.5))
+        self.mostrar_fase("DATOS", COLOR_FASE_DATOS)
 
         datos = VGroup(
             MathTex(r"\text{Peso} = 300\ \text{N}"),
@@ -185,6 +209,8 @@ class TrabajoEnergiaPotencialTikTok(Scene):
     # 0:16 - 0:26  Definicion de trabajo
     # ------------------------------------------------------------------
     def definir_trabajo(self):
+        self.mostrar_fase("FÓRMULA", COLOR_FASE_FORMULA)
+
         formula = cap_width(MathTex(
             r"\text{Trabajo} = \text{Fuerza} \times \text{Distancia}"
         ).scale(0.75)).to_edge(UP, buff=1.1)
@@ -263,6 +289,7 @@ class TrabajoEnergiaPotencialTikTok(Scene):
     # ------------------------------------------------------------------
     def comparar_caminos(self):
         self.play(FadeIn(self.escenario), run_time=0.6)
+        self.mostrar_fase("DESARROLLO", COLOR_FASE_DESARROLLO)
 
         # Se crean aqui, a partir de la posicion EN VIVO de rampa/camino
         # vertical (ya escalados y movidos por hook()/plantear_problema()).
@@ -336,6 +363,7 @@ class TrabajoEnergiaPotencialTikTok(Scene):
     # ------------------------------------------------------------------
     def energia_potencial(self):
         self.play(FadeOut(self.escenario), FadeOut(self.linea_misma_altura), FadeOut(self.caja_vertical))
+        self.mostrar_fase("RESULTADO", COLOR_FASE_RESULTADO)
 
         frase = cap_width(Text(
             "La energía no sabe\nqué camino tomaste",
@@ -423,7 +451,7 @@ class TrabajoEnergiaPotencialTikTok(Scene):
 
         self.play(
             FadeOut(reto_titulo), FadeOut(caja_grupo), FadeOut(reto_texto),
-            FadeOut(self.formula_card),
+            FadeOut(self.formula_card), FadeOut(self.fase_actual),
         )
 
     # ------------------------------------------------------------------
