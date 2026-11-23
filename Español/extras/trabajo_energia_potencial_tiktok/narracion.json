@@ -1,0 +1,11 @@
+{
+  "hook": "¿Subir esta caja por la rampa cuesta menos trabajo que levantarla directo? Tu intuición te va a engañar.",
+  "plantear_problema": "Esta caja pesa 300 newtons. El camión está a 4 metros de altura, y la rampa mide 10 metros de largo.",
+  "definir_trabajo": "El trabajo en física es la fuerza que aplicas, multiplicada por la distancia que recorres empujando en esa dirección.",
+  "proporcionalidad": "Si duplicas la fuerza con la misma distancia, el trabajo se duplica. Pero si además duplicas la distancia, el trabajo se multiplica por cuatro.",
+  "comparar_caminos": "Por la rampa, la fuerza necesaria es menor, 120 newtons, pero caminas más: 10 metros. El trabajo da 1200 joules. Levantándola derecho, la fuerza es mayor, pero el camino es más corto. El trabajo... también da 1200 joules.",
+  "energia_potencial": "Esa energía que ganó la caja se llama energía potencial gravitatoria: peso por altura. Se mide en joules — un joule es el trabajo de 1 newton a lo largo de 1 metro.",
+  "estrategia": "Por eso no importa si empujas por una rampa larga o levantas directo: lo único que determina la energía ganada es el cambio de altura.",
+  "reto_final": "Tu reto: si pesara 450 newtons, ¿qué fuerza necesitas para subirla por la misma rampa? Coméntalo abajo.",
+  "cierre": "Física en 60 segundos, parte 5. Sígueme para más física."
+}

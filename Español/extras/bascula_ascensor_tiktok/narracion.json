@@ -1,0 +1,13 @@
+{
+  "hook": "¿Sentiste que pesabas más al subir en un ascensor? Tu peso no cambió... pero la báscula sí. Y hay un momento en que marca cero.",
+  "plantear_problema": "Una persona de 60 kilos se sube a una báscula, dentro de un ascensor que puede subir, bajar, o quedarse quieto.",
+  "dcl": "La báscula nunca mide tu peso real. Mide la normal: la fuerza con la que la báscula empuja hacia arriba para sostenerte.",
+  "segunda_ley": "La segunda ley en el eje vertical: la normal menos el peso es la masa por la aceleración del ascensor. Esa aceleración es la clave.",
+  "reposo_y_velocidad_constante": "En reposo, la báscula marca 600 newtons. Y a velocidad constante, marca lo mismo. Lo que importa no es moverse: es acelerar.",
+  "sube_acelerando": "Si el ascensor arranca acelerando hacia arriba, la báscula sube a 720 newtons: te sientes más pesado.",
+  "baja_frenando_comparacion": "Si el ascensor baja pero frena, su aceleración también apunta hacia arriba... y marca los mismos 720 newtons.",
+  "baja_acelerando": "Pero si baja acelerando, la aceleración apunta hacia abajo, y la báscula marca solo 480: te sientes más liviano.",
+  "caida_libre": "Si el ascensor cae libremente, su aceleración es exactamente g. La normal se hace cero. La báscula marca cero, aunque tu masa y tu peso siguen igual. Eso es ingravidez.",
+  "resumen_formula": "La fórmula es siempre la misma: la normal es igual a la masa por la gravedad más la aceleración del ascensor. Solo cambia el signo y el valor de esa aceleración.",
+  "reto_final": "Tu reto: ¿qué aceleración haría que la báscula marcara exactamente el doble de tu peso real? Piénsalo bien y coméntalo abajo con el valor exacto. Sígueme para la parte tres de esta serie."
+}
