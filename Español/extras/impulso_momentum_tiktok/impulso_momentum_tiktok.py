@@ -88,6 +88,22 @@ class ImpulsoMomentumTikTok(Scene):
         rueda_2.move_to(cuerpo.get_corner(DR) + LEFT * 0.32 + DOWN * 0.03)
         return VGroup(cuerpo, rueda_1, rueda_2)
 
+    def transicion_wipe(self, color=WHITE, run_time=0.22):
+        """Corte tipo 'wipe': una barra de color barre toda la pantalla de
+        izquierda a derecha, como un corte editado -- marca un cambio de
+        escena sin dejar el corte seco de un FadeOut/Write aislado."""
+        ancho = config.frame_width + 1.0
+        alto = config.frame_height + 1.0
+        barra = Rectangle(
+            width=ancho, height=alto, color=color, fill_color=color,
+            fill_opacity=1.0, stroke_width=0,
+        )
+        barra.move_to(LEFT * ancho)
+        self.add(barra)
+        self.play(barra.animate.move_to(ORIGIN), run_time=run_time, rate_func=rate_functions.linear)
+        self.play(barra.animate.move_to(RIGHT * ancho), run_time=run_time, rate_func=rate_functions.linear)
+        self.remove(barra)
+
     def mostrar_fase(self, texto, color, run_time=0.4):
         """Etiqueta de fase fija en la esquina superior izquierda (Datos /
         Formula / Desarrollo / Resultado), igual que en el video 5."""
@@ -121,7 +137,17 @@ class ImpulsoMomentumTikTok(Scene):
         )
         self.play(FadeIn(hook_text, scale=1.1, rate_func=rate_functions.ease_out_back), run_time=0.8)
         self.play(auto.animate.next_to(pared, LEFT, buff=0.05), run_time=1.0, rate_func=rate_functions.ease_in_quad)
-        self.play(Wiggle(auto, scale_value=1.08, rotation_angle=0.02 * TAU), run_time=0.6)
+
+        impacto = Star(
+            n=8, outer_radius=0.4, inner_radius=0.18, color=YELLOW,
+            fill_color=YELLOW, fill_opacity=0.95, stroke_width=0,
+        ).move_to(pared.get_center())
+        self.play(
+            FadeIn(impacto, scale=1.8, rate_func=rate_functions.ease_out_expo),
+            Flash(pared.get_center(), color=YELLOW, flash_radius=0.7, line_length=0.3),
+            run_time=0.25,
+        )
+        self.play(Wiggle(auto, scale_value=1.1, rotation_angle=0.025 * TAU), FadeOut(impacto), run_time=0.6)
         self.wait(1.3)
 
         self.play(FadeOut(hook_text))
@@ -133,6 +159,7 @@ class ImpulsoMomentumTikTok(Scene):
     # ------------------------------------------------------------------
     def plantear_problema(self):
         self.play(FadeOut(self.pared), self.auto.animate.scale(0.75).to_edge(DOWN, buff=1.6))
+        self.transicion_wipe(COLOR_FASE_DATOS)
         self.mostrar_fase("DATOS", COLOR_FASE_DATOS)
 
         datos = VGroup(
@@ -151,6 +178,7 @@ class ImpulsoMomentumTikTok(Scene):
     # 0:16 - 0:24  Concepto: momentum
     # ------------------------------------------------------------------
     def concepto_momentum(self):
+        self.transicion_wipe(COLOR_FASE_FORMULA)
         self.mostrar_fase("FÓRMULA", COLOR_FASE_FORMULA)
 
         frase = cap_width(Text(
@@ -244,7 +272,7 @@ class ImpulsoMomentumTikTok(Scene):
         self.play(
             t1_tracker.animate.set_value(altura_barra(DT_VOLANTE, DT_BOLSA)),
             f1_tracker.animate.set_value(altura_barra(F_VOLANTE, F_VOLANTE)),
-            run_time=1.2, rate_func=rush_into,
+            run_time=1.3, rate_func=rate_functions.ease_out_elastic,
         )
         valor_t1 = cap_width(MathTex(f"{DT_VOLANTE:.2f}\\,s", color=COLOR_TIEMPO).scale(0.55))
         valor_t1.next_to(barra_t1, UP, buff=0.15)
@@ -257,7 +285,7 @@ class ImpulsoMomentumTikTok(Scene):
         self.play(
             t2_tracker.animate.set_value(altura_barra(DT_BOLSA, DT_BOLSA)),
             f2_tracker.animate.set_value(altura_barra(F_BOLSA, F_VOLANTE)),
-            run_time=1.2, rate_func=rush_into,
+            run_time=1.3, rate_func=rate_functions.ease_out_elastic,
         )
         valor_t2 = cap_width(MathTex(f"{DT_BOLSA:.1f}\\,s", color=COLOR_TIEMPO).scale(0.55))
         valor_t2.next_to(barra_t2, UP, buff=0.15)
@@ -282,6 +310,7 @@ class ImpulsoMomentumTikTok(Scene):
     # 0:50 - 1:00  La trampa (error conceptual comun)
     # ------------------------------------------------------------------
     def la_trampa(self):
+        self.transicion_wipe(RED)
         titulo = cap_width(Text("LA TRAMPA 🚫", font_size=34, weight=BOLD, color=RED)).to_edge(UP, buff=1.1)
         self.play(Write(titulo), run_time=0.7)
 
@@ -289,8 +318,11 @@ class ImpulsoMomentumTikTok(Scene):
             "\"La bolsa reduce\nel golpe total\"",
             font_size=26, line_spacing=1.1,
         )).next_to(titulo, DOWN, buff=0.6)
+        equis = Text("✗", font_size=40, weight=BOLD, color=RED).next_to(idea_falsa, LEFT, buff=0.3)
         self.play(FadeIn(idea_falsa, shift=UP * 0.2), run_time=0.7)
-        self.wait(0.5)
+        self.wait(0.3)
+        self.play(FadeIn(equis, scale=1.6, rate_func=rate_functions.ease_out_back), run_time=0.4)
+        self.wait(0.3)
 
         tachon = Line(
             idea_falsa.get_left() + LEFT * 0.1, idea_falsa.get_right() + RIGHT * 0.1,
@@ -303,17 +335,21 @@ class ImpulsoMomentumTikTok(Scene):
             "El impulso (1600) es\nSIEMPRE el mismo.\nSolo cambia cuánto\ntiempo tarda.",
             font_size=24, line_spacing=1.15, color=GREEN,
         )).next_to(idea_falsa, DOWN, buff=0.7)
+        check = Text("✓", font_size=40, weight=BOLD, color=GREEN).next_to(idea_correcta, LEFT, buff=0.3)
         self.play(FadeIn(idea_correcta, shift=UP * 0.2), run_time=0.8)
-        self.wait(2.3)
+        self.play(FadeIn(check, scale=1.6, rate_func=rate_functions.ease_out_back), run_time=0.4)
+        self.wait(1.9)
 
         self.play(
             FadeOut(titulo), FadeOut(idea_falsa), FadeOut(tachon), FadeOut(idea_correcta),
+            FadeOut(equis), FadeOut(check),
         )
 
     # ------------------------------------------------------------------
     # 1:00 - 1:09  Analogia: piso duro vs colchon
     # ------------------------------------------------------------------
     def analogia(self):
+        self.transicion_wipe(COLOR_FASE_RESULTADO)
         self.mostrar_fase("RESULTADO", COLOR_FASE_RESULTADO)
 
         base = Line(LEFT * 1.9, RIGHT * 1.9, color=GREY_B, stroke_width=3).to_edge(DOWN, buff=1.6)
@@ -340,7 +376,11 @@ class ImpulsoMomentumTikTok(Scene):
             caja_piso.animate.move_to(piso_pos + UP * 0.2),
             run_time=0.5, rate_func=rate_functions.ease_in_quad,
         )
-        self.play(Wiggle(caja_piso, scale_value=1.1, rotation_angle=0.015 * TAU), run_time=0.4)
+        self.play(
+            Wiggle(caja_piso, scale_value=1.12, rotation_angle=0.02 * TAU),
+            Flash(piso_pos, color=RED, flash_radius=0.5, line_length=0.2),
+            run_time=0.4,
+        )
 
         self.play(
             caja_colchon.animate.move_to(colchon_pos + UP * 0.25),
@@ -379,9 +419,15 @@ class ImpulsoMomentumTikTok(Scene):
         ])
 
         self.play(Write(titulo), run_time=0.8)
-        self.play(LaggedStart(*[FadeIn(p, shift=RIGHT * 0.3) for p in pasos], lag_ratio=0.4), run_time=1.6)
+        self.play(
+            LaggedStart(*[
+                FadeIn(p, shift=RIGHT * 0.3, scale=1.08, rate_func=rate_functions.ease_out_back)
+                for p in pasos
+            ], lag_ratio=0.4),
+            run_time=1.8,
+        )
         self.play(*[GrowArrow(f) for f in flechas], run_time=0.6)
-        self.wait(5.0)
+        self.wait(4.8)
 
         self.play(FadeOut(titulo), FadeOut(pasos), FadeOut(flechas))
 
