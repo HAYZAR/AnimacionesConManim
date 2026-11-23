@@ -54,6 +54,18 @@ RATE_EDGE = os.environ.get("TTS_RATE", "+0%")  # p.ej "+10%" para hablar mas rap
 # `pip install edge-tts` e internet.
 
 
+def run(cmd):
+    """subprocess.run con check=True, pero imprimiendo stderr real antes de
+    relanzar el error -- sin esto, un fallo de ffmpeg/edge-tts en Windows solo
+    muestra "returned non-zero exit status", sin decir por que."""
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"--- ERROR al correr: {' '.join(str(c) for c in cmd)} ---", file=sys.stderr)
+        print(r.stderr, file=sys.stderr)
+        r.check_returncode()
+    return r
+
+
 def calcular_timing(py_path, clase):
     with open(py_path, "r", encoding="utf-8") as f:
         tree = ast.parse(f.read(), filename=str(py_path))
@@ -86,24 +98,15 @@ def calcular_timing(py_path, clase):
 
 def sintetizar(texto, out_audio):
     if BACKEND == "edge":
-        subprocess.run(
-            ["edge-tts", "--voice", VOZ_EDGE, "--rate", RATE_EDGE,
-             "--text", texto, "--write-media", str(out_audio)],
-            check=True, capture_output=True, text=True,
-        )
+        run(["edge-tts", "--voice", VOZ_EDGE, "--rate", RATE_EDGE,
+             "--text", texto, "--write-media", str(out_audio)])
     else:
-        subprocess.run(
-            ["espeak-ng", "-v", VOZ_ESPEAK, "-s", VELOCIDAD_ESPEAK, "-w", str(out_audio), texto],
-            check=True, capture_output=True, text=True,
-        )
+        run(["espeak-ng", "-v", VOZ_ESPEAK, "-s", VELOCIDAD_ESPEAK, "-w", str(out_audio), texto])
 
 
 def duracion_audio(path):
-    r = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
-        check=True, capture_output=True, text=True,
-    )
+    r = run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "default=noprint_wrappers=1:nokey=1", str(path)])
     return float(r.stdout.strip())
 
 
@@ -144,11 +147,8 @@ def main():
 
     # Base de silencio del largo total del video
     silencio = tmp / "silencio_base.wav"
-    subprocess.run(
-        ["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=mono",
-         "-t", f"{total + 1.0:.2f}", str(silencio)],
-        check=True, capture_output=True, text=True,
-    )
+    run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=mono",
+         "-t", f"{total + 1.0:.2f}", str(silencio)])
 
     inputs = ["-i", str(silencio)]
     filtros = []
@@ -167,17 +167,14 @@ def main():
 
     narracion_wav = tmp / "narracion_completa.wav"
     cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", filtro_completo, "-map", "[aout]", str(narracion_wav)]
-    subprocess.run(cmd, check=True, capture_output=True, text=True)
+    run(cmd)
     print(f"Narracion mezclada: {narracion_wav}")
 
     # Mux con el video (copia el stream de video, codifica audio a aac)
-    subprocess.run(
-        ["ffmpeg", "-y", "-i", str(video_in), "-i", str(narracion_wav),
+    run(["ffmpeg", "-y", "-i", str(video_in), "-i", str(narracion_wav),
          "-map", "0:v:0", "-map", "1:a:0",
          "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
-         "-shortest", str(video_out)],
-        check=True, capture_output=True, text=True,
-    )
+         "-shortest", str(video_out)])
     print(f"Video con narracion: {video_out}")
 
 
