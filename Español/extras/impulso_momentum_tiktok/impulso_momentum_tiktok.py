@@ -460,4 +460,8 @@ class ImpulsoMomentumTikTok(Scene):
             font_size=26, line_spacing=1.2, weight=BOLD,
         ))
         self.play(FadeIn(cierre_texto, scale=1.1, rate_func=rate_functions.ease_out_back), run_time=0.8)
-        self.wait(4.5)
+        # Margen extra (vs. 4.5s original): la voz neuronal de edge-tts habla
+        # mas lento que la offline con la que se ajusto este beat al inicio,
+        # y sin este colchon el cierre se corta a medio hablar por el limite
+        # -shortest del mux cuando se usa TTS_BACKEND=edge.
+        self.wait(8.0)
