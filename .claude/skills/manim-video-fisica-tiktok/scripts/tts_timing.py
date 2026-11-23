@@ -12,6 +12,14 @@ Imprime: metodo_name  start_seconds  duration_seconds
 import ast
 import sys
 
+# Duracion fija del "beat" reproducir_intro(self, "<tema>") de intro_marca.py
+# (la pantalla de marca H2B al inicio de cada video). No es un metodo de la
+# clase, asi que el analisis AST normal (que solo sigue self.metodo()) no lo
+# detecta -- se trata aqui como caso especial con una duracion conocida,
+# verificada contra el render real (ver intro_marca.py).
+DURACION_INTRO = 4.4
+NOMBRE_INTRO = "reproducir_intro"
+
 
 def literal_or_none(node):
     try:
@@ -105,6 +113,8 @@ class Evaluator:
             if isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name):
                 if call.func.value.id == "self":
                     return self.call_duration(call, env)
+            if isinstance(call.func, ast.Name) and call.func.id == NOMBRE_INTRO:
+                return DURACION_INTRO
             return 0.0
         return 0.0
 
@@ -137,12 +147,21 @@ def main():
                 and child.func.value.id == "self"
             ):
                 call_order.append(child.func.attr)
+            elif (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Name)
+                and child.func.id == NOMBRE_INTRO
+            ):
+                call_order.append(NOMBRE_INTRO)
 
     t = 0.0
     for name in call_order:
-        if name not in methods:
+        if name == NOMBRE_INTRO:
+            dur = DURACION_INTRO
+        elif name not in methods:
             continue
-        dur = ev.method_duration(methods[name], {})
+        else:
+            dur = ev.method_duration(methods[name], {})
         print(f"{name}\t{t:.3f}\t{dur:.3f}")
         t += dur
     print(f"TOTAL\t{t:.3f}\t0.000")

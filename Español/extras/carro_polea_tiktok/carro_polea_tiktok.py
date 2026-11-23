@@ -13,6 +13,11 @@ El guion completo (narracion VO, timings, specs de TikTok) esta en GUION.md
 
 from manim import *
 
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", ".claude", "skills", "manim-video-fisica-tiktok", "assets"))
+from intro_marca import reproducir_intro  # noqa: E402
+
 # --- Formato vertical real (9:16) --------------------------------------
 config.pixel_width = 1080
 config.pixel_height = 1920
@@ -58,6 +63,7 @@ COLOR_ACEL = ORANGE
 
 class CarroPoleaTikTok(Scene):
     def construct(self):
+        reproducir_intro(self, "Tensión y poleas")
         self.crear_escenario()
         self.hook()
         self.plantear_problema()

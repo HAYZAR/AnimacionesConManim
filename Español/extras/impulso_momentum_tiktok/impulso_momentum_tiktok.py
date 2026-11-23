@@ -16,6 +16,11 @@ publicacion para TikTok estan en GUION.md (misma carpeta).
 
 from manim import *
 
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", ".claude", "skills", "manim-video-fisica-tiktok", "assets"))
+from intro_marca import reproducir_intro  # noqa: E402
+
 # --- Formato vertical real (9:16) --------------------------------------
 config.pixel_width = 1080
 config.pixel_height = 1920
@@ -63,6 +68,7 @@ def altura_barra(valor, valor_max):
 
 class ImpulsoMomentumTikTok(Scene):
     def construct(self):
+        reproducir_intro(self, "Impulso y momentum")
         self.hook()
         self.plantear_problema()
         self.concepto_momentum()

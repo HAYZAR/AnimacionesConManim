@@ -32,7 +32,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from tts_timing import Evaluator  # noqa: E402
+from tts_timing import Evaluator, DURACION_INTRO, NOMBRE_INTRO  # noqa: E402
 
 BACKEND = os.environ.get("TTS_BACKEND", "espeak")  # "espeak" o "edge"
 
@@ -84,13 +84,22 @@ def calcular_timing(py_path, clase):
                 and child.func.value.id == "self"
             ):
                 call_order.append(child.func.attr)
+            elif (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Name)
+                and child.func.id == NOMBRE_INTRO
+            ):
+                call_order.append(NOMBRE_INTRO)
 
     timing = []
     t = 0.0
     for name in call_order:
-        if name not in methods:
+        if name == NOMBRE_INTRO:
+            dur = DURACION_INTRO
+        elif name not in methods:
             continue
-        dur = ev.method_duration(methods[name], {})
+        else:
+            dur = ev.method_duration(methods[name], {})
         timing.append((name, t, dur))
         t += dur
     return timing, t
